@@ -1,0 +1,6 @@
+*.swp
+*.bak*
+*.pyc
+aleabot.conf
+log
+state_aleabot_rollover.pkl
