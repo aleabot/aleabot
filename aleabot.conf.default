@@ -1,0 +1,300 @@
+##
+## Aleabot configuration file
+##
+
+
+##
+## The auth section contains KoL username and password.
+##
+[auth]
+
+# Username
+# THIS SETTING MUST BE DEFINED
+#username = 
+
+# Password
+# THIS SETTING MUST BE DEFINED
+#password = 
+
+
+##
+## The bot section defines miscellaneous bot parameters.
+##
+[bot]
+
+# Number of seconds between chat updates
+time_to_sleep = 5
+
+# Number of seconds between kmail updates
+time_to_sleep_kmail = 120
+
+# Number of seconds between forced clan state updates.
+# A clan state update refreshes internal variables that store the
+# clan the bot is currently in, as well as the list of clans that
+# have whitelisted the bot. 0 to disable forced updates.
+clan_state_refresh_time = 3600
+
+# Number of seconds to wait before switching back to home clan.
+home_clan_delay = 120
+
+# Clan ID of the bot's home clan
+home_clan_id = 2046985919
+
+# Console report level
+# Typical values:
+# 300: Show errors only
+# 400: Show warnings and errors
+# 500: Show informational messages, warnings and errors
+# 600: Show trace messages in addition to the above
+# 700: Show debug messages in addition to the above
+report_level = 500
+
+# Log file prefix (relative to application directory)
+# Leave empty to disable all logging
+log_file = log/aleabot
+
+# Log level, see report_level for values
+log_level = 500
+
+
+##
+## The limits section defines limits that prevent abuse of the bot.
+##
+[limits]
+
+# Channels where public rolling is permitted for anyone, space separated
+channels = games
+
+# Channels where clan-wide rolling is permitted for anyone, space separated
+clanchannels = clan hobopolis slimetube hauntedhouse
+
+# Number of seconds to wait between private rolls (per player)
+# 0 to disable
+private_perplayer_limit = 1
+
+# Allow this many private rolls at once (per player)
+# 0 to disable
+private_perplayer_burst = 3
+
+# Number of seconds to wait between public rolls for the same player
+# 0 to disable
+public_perplayer_limit = 60
+
+# Number of seconds to wait between public rolls (per channel)
+# 0 to disable
+public_perchannel_limit = 60
+
+# Allow public diceless rolls?
+allow_diceless_public = yes
+
+# Allow private diceless rolls?
+allow_diceless_private = yes
+
+# Allow public D1 rolls?
+allow_d1_public = yes
+
+# Allow private D1 rolls?
+allow_d1_private = yes
+
+# Maximum permitted expression count
+expression_count_max = 10
+
+# Allow nDx rolls up to n = this number (cumulative within expression)
+dice_per_expression_max = 1000
+
+# Maximum of wangs per sender per day
+wang_sender_limit = 10
+
+# Maximum of wangs per target per day
+wang_target_limit = 3
+
+# Maximum of arrows per sender per day
+arrow_sender_limit = 1
+
+
+##
+## The chatter section defines bot responses.
+##
+## Variables that may be used in responses:
+##     %P = player name
+##     %p = player ID
+## Roll request responses only:
+##     %E = expression list
+##     %R = result list
+##     %C = channel
+##     %c = clan
+## Wang and arrow request responses only:
+##     %T = target
+## Uneffect request responses only:
+##     %U = matching effect names
+##
+## %% becomes a single percent sign.
+##
+[chatter]
+
+# Text for private rolling
+rolltext_private = /msg %p Rolling %E gives %R.
+
+# Text for public rolling
+rolltext_public = /%C Rolling %E for %P gives %R.
+
+# Text for private diceless rolling
+rolltext_diceless_private = /msg %p Computing %E gives %R.
+
+# Text for public diceless rolling
+rolltext_diceless_public = /%C Computing %E for %P gives %R.
+
+# Response for helprequest
+helptext = To roll in private: /msg aleabot roll 1dX. To roll in public: /msg aleabot roll 1dX in games. See my display case for more documentation than you could wish for.
+
+# Response for hellorequest
+hellotext = Good day, %P! Your feeble request is?
+
+# Response for thanksrequest
+thankstext = You're welcome! Anything else I can do for you?
+
+# Response for wangrequest
+wangtext = %T has been slapped with a wang.
+
+# Response for reflexive wangrequest
+wangtext_self = You have been slapped with a wang.
+
+# Response for arrowrequest
+arrowtext = An arrow is on its way to %T.
+
+# Response for reflexive arrowrequest
+arrowtext_self = An arrow is on its way to you.
+
+# Response for uneffectrequest
+uneffecttext = Removing effect: %U
+
+# Response for kmailed arrow request with no arrow attached
+kmailtext_arrow_notattached = I tried to interpret this message as an arrow request, but there was no arrow attached. Please attach an arrow so that I can fire it at you.
+
+# Response for kmailed arrow request with extra goodies attached
+kmailtext_arrow_extraattached = I tried to interpret this message as an arrow request, but there were additional items or meat attached. Please only attach an arrow so that I can fire it at you.
+
+# Response for kmailed donate request
+kmailtext_donate_thanks = Hi %P, thank you very much for your donation! It is very appreciated.
+
+# Response for kmailed donate request with no items or meat
+kmailtext_donate_empty = I tried to interpret this message as a donation, but there was nothing attached. Did you forget something? Either way, thank you for the thought!
+
+# Response for kmail with unknown command
+kmailtext_unknown = Hi %P! I'm aleabot, a dice rolling bot. I do not know how to interpret your message. I currently understand two types of messages:
+	"arrow" (with a time's arrow attached) to get shot with an arrow.
+	"donate" (with items or meat attached) for donation
+	My main features (such as dice rolling) are accessible via chat PM. Check my display case for help.
+
+# Sent between actual response and quoted message
+kmailtext_quote = Here is a copy of your message:
+
+# Like kmailtext_quote, if unable to send back items/meat due to Ronin or Hardcore
+kmailtext_quote_ronin = You sent some items and meat which I tried to return, but you are in Hardcore or Ronin. Contact franz1 (#2272489) if you need them back.
+	Here is a copy of your message:
+
+# Generic error message (e.g. when getting unknown errors from server requests)
+error_generic = I am Error. *BEEP* *CRASH* *ZOT* *BEEP*
+
+# Error message when trying to roll in an inaccessible channel
+error_channel_inaccessible = I do not have access to that channel.
+
+# Error message when trying to roll in a disallowed channel
+error_channel_disallowed = Public rolls are not allowed in that channel.
+
+# Error message when player is not in a clan but tries to roll in /clan etc.
+error_clanless_player = Get into a clan first, then try that again - if you dare.
+
+# Error message when trying to roll in a clan without whitelist
+error_need_whitelist = I need a whitelist to your clan for that to work.
+
+# Error message when fetching player's clan or switching clan failed
+error_clan_request = Something failed while trying to switch clans. Oops!
+
+# Error message for disallowed private roll due to per-player limit
+error_private_perplayer_limit = Sorry, you have to wait for one second between private rolls.
+
+# Error message for disallowed public roll due to per-player limit
+error_public_perplayer_limit = Sorry, you have to wait for one minute since the last roll.
+
+# Error message for disallowed public roll due to per-channel limit
+error_public_perchannel_limit = Sorry, you have to wait for one minute since the last roll.
+
+# Error message when request contains too many expressions
+error_too_many_expressions = I can handle only ten of these dice formulas at once. How'd you feel if I threw that much math at you?
+
+# Error message when expression contains too many dice
+error_expression_too_many_dice = More than 1000 dice in one formula? Not going to fly.
+
+# Error message for disallowed diceless roll
+error_diceless = No dice. (Try something like "roll 1d10 in games".)
+
+# Error message for disallowed D1 roll
+error_d1 = Where's the fun in rolling a d1?
+
+# Error message when expression can not be evaluated for some reason
+error_expression_eval = That did not compute, sorry.
+
+# Error message when no wangs are left
+error_wang_no_wangs = My bag of wangs is empty.
+
+# Error message when target player is unknown
+error_wang_player_not_found = That player doesn't exist.
+
+# Error message when wang target is aleabot
+error_wang_self = No, just no.
+
+# Error message when wang_target_limit has been reached
+error_wang_target_limit = Target has already been hit with enough wangs today.
+
+# Error message when wang_sender_limit has been reached
+error_wang_sender_limit = You have already used enough wangs today.
+
+# Error message when wang could not be used for an unknown reason
+error_wang_generic = Unable to use wang for unknown reason.
+
+# Error message when no arrows are left
+error_arrow_no_arrows = My quiver is empty.
+
+# Error message when target player is unknown
+error_arrow_player_not_found = That player doesn't exist.
+
+# Error message when target is in ronin or hardcore
+error_arrow_ronin = Target is in Ronin or Hardcore.
+
+# Error message when target has already been hit with an arrow
+error_arrow_already_hit = Target has already been hit with an arrow today.
+
+# Error message when arrow target is aleabot
+error_arrow_self = I haven't learnt the feat of shooting straight up yet.
+
+# Error message when arrow_sender_limit has been reached
+error_arrow_sender_limit = You have already used an arrow today.
+
+# Error message when arrow could not be fired for an unknown reason
+error_arrow_generic = Unable to fire an arrow for unknown reason.
+
+# Error message when uneffect request contained no effect name
+error_uneffect_no_effect_given = Please specify the effect you want me to remove.
+
+# Error message when uneffect request did not match a known effect
+error_uneffect_no_match = I don't know that effect.
+
+# Error message when uneffect request matched multiple known effects
+error_uneffect_too_many_matches = Too many matches found, please be more specific: %U
+
+# Error message when uneffect request contained an effect we're not cursed with
+error_uneffect_not_cursed = I do not currently have that effect: %U
+
+# Error message when uneffect request was valid but we're out of SGEEAs
+error_uneffect_no_sgeea = I do not have any soft green echo eyedrop antidotes. Would you be kind enough to send me some?
+
+# Error message when uneffect request failed for some unknown reason
+error_uneffect_generic = Unable to remove effect for unknown reason.
+
+# Syntax error messages
+error_bad_syntax_1 = I don't understand. English is not my native tongue, if what you typed even was English.
+error_bad_syntax_2 = Huh?
+error_bad_syntax_3 = You don't make any sense to me. You never seem to make any sense to me.
+error_bad_syntax_4 = Come again? (That's what she said.)
+error_bad_syntax_5 = Sorry, I have no blasted idea what you could be talking about. Try /msg aleabot help?
