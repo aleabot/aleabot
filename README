@@ -96,6 +96,51 @@ The configuration file consists of 4 sections:
   aleabot.conf.default for an example.
 
 
+Using the bot
+=============
+
+To roll a die:
+/msg aleabot roll xdx in games
+
+To roll privately:
+/msg aleabot roll xdx
+
+To roll a die in clan chat (I need a whitelist, and dungeon access for rolling in a dungeon channel):
+/msg aleabot roll xdx in clan
+/msg aleabot roll xdx in hobopolis
+/msg aleabot roll xdx in slimetube
+/msg aleabot roll xdx in hauntedhouse
+
+To wang yourself:
+/msg aleabot wang
+To wang someone else:
+/msg aleabot wang <person>
+To be hit with a time's arrow:
+/msg aleabot arrow
+To hit someone else with a time's arrow:
+/msg aleabot arrow <person>
+
+To remove a chat effect:
+/msg aleabot uneffect wang
+/msg aleabot uneffect brr
+/msg aleabot uneffect jaw
+
+DICE ROLLING FEATURES
+
+I can roll multiple (separate) dice at once:
+/msg aleabot roll 1d10, 1d100, 1d1000 in games
+
+I can do funky math with dice:
+/msg aleabot roll (1d3)^(1d3)^(1d3) in games
+will give 1, 2, 3, 4, 8, 9, 16, 27, 81, 256, 512, 6561, 19683, 134217728 or 7625597484987.
+
+LIMITS
+
+You can only roll dice in public once per minute.
+
+A person can only be wanged up to 3 times a day and arrowed once a day. Also, you can only use the wang function up to 10 times per day and the arrow function once a day.
+
+
 Bug reports, feature requests and patches
 =========================================
 
