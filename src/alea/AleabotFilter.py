@@ -62,8 +62,9 @@ class NeedWhitelistError(Exception):
         return repr(self.value)
 
 
-ITEM_ID_WANG = 625
-ITEM_ID_ARROW = 4939
+ITEM_ID_WANG = 625         # WANG
+ITEM_ID_ARROW = 4939       # time's arrow
+ITEM_ID_CANDYHEART = 2308  # yellow candy heart
 
 
 # This global variable contains non-persistent bot state
@@ -144,6 +145,8 @@ def botProcessKmail(context, **kwargs):
     response = ''
     # Should items and meat be sent back?
     return_goodies = True
+    # Should a candy heart be sent?
+    send_heart = False
 
     # if 1 arrow was sent and the kmail is empty, interpret it as "arrow"
     if cmd == "" and len(items) == 1 and items[0]['id'] == ITEM_ID_ARROW and items[0]['quantity'] == 1 and meat == 0:
@@ -188,6 +191,7 @@ def botProcessKmail(context, **kwargs):
             Report.info('bot', 'Donation received from ' + user_name)
             response = aleabot.config.get('kmailtext_donate_thanks')
             return_goodies = False
+            send_heart = True
 
     else:
         # Handle unknown command
@@ -217,6 +221,17 @@ def botProcessKmail(context, **kwargs):
                     Report.error('bot', 'Unexpected error while sending response_kmail2: ' + str(err2))
             else:
                 Report.error('bot', 'Unexpected error while sending response_kmail: ' + str(err))
+
+    # Send a candy heart
+    if send_heart:
+        try:
+            Report.info('bot', 'Sending candy heart to player: ' + user_name)
+            heartreq = CursePlayerRequest(bot.session, str(user_id), ITEM_ID_CANDYHEART)
+            heartreq.requestData['texta'] = 'THANK'
+            heartreq.requestData['textb'] = 'YOU'
+            heartreq.doRequest()
+        except Error.Error as err:
+            Report.error('bot', 'Couldn\'t send candy heart: ' + str(err))
 
     returnCode = FilterManager.FINISHED
     return returnCode
