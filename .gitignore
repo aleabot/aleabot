@@ -3,4 +3,5 @@
 *.pyc
 aleabot.conf
 log
+pykol
 state_aleabot_rollover.pkl
