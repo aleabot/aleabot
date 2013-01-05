@@ -1,6 +1,203 @@
-README (TODO)
-- Features
-- Getting started
-- Configuration
-- License
+  O   o     o--o   O   o--o   o-o  o-O-o 
+ / \  |     |     / \  |   | o   o   |   
+o---o |     O-o  o---o O--o  |   |   |   
+|   | |     |    |   | |   | o   o   |   
+o   o O---o o--o o   o o--o   o-o    o   
+
+
+"Eatur quo deorum ostenta et inimicorum iniquitas vocat."
+
+
+Features
+========
+
+Aleabot is a Kingdom of Loathing [1] bot. Its main features are rolling dice,
+handing out wangs and shooting arrows. Aleabot is written using the
+pykol library [2]. Aleabot is designed to be highly configurable, although
+adding new commands will require code modification.
+
+Aleabot was written by franz1 (#2272489) and is running on aleabot (#2379422).
+
+[1] http://www.kingdomofloathing.com
+[2] http://forums.kingdomofloathing.com/vb/showthread.php?t=154587
+
+
+Getting started
+===============
+
+Requirements:
+
+- Python 2.7 or any later Python 2 version. (Python 2.6 and earlier may work
+  but have not been tested. Python 3.0 and later will not work.)
+
+- pykol (see below for instructions)
+
+- A reasonably stable internet connection
+
+- Access to the bot account (or any account, really)
+
+- Operating system should not matter, as long as Python and pykol work.
+  The bot has only been tested on Gentoo Linux, however.
+
+How to set up Aleabot:
+
+- Extract (or git clone) the aleabot source code to a directory.
+
+- Switch to that directory and copy aleabot.conf.default to aleabot.conf.
+
+- Edit aleabot.conf: make sure to configure at least the username and password,
+  but you will probably want to look at the rest of the options too.
+
+- Download pykol and extract it inside the top aleabot directory (so that
+  the pykol source is in aleabot/pykol/src). An easy way to do that is to
+  run the command
+    "git clone https://github.com/scelis/pykol.git"
+  from the top aleabot directory.
+
+- Run bin/aleabot.py.
+
+
+Configuration
+=============
+
+Most configuration settings should be fairly straightforward and
+are documented in aleabot.conf.default.
+
+The configuration file consists of 4 sections:
+
+- auth: Authentication settings. You must supply username and password here.
+
+- bot: Basic bot settings and delays. For example, adjust time_to_sleep to
+  change how fast aleabot reacts. All time values in this section are in
+  seconds. You can also configure aleabot's logging behaviour in this section.
+
+- limits: The values in this section are designed to prevent abuse of the bot.
+  Reduce public roll limits with great caution. Also, "games" is probably
+  the only non-clan channel that rolls should ever be allowed in.
+
+- chatter: Everything the bot says is in this section. You may use variables
+  (such as %P for the name of the player who sent the request to aleabot)
+  in most of the settings here.
+
+  If you want to define multiple values for one settings, of which one
+  should be chosen at random each time the setting is needed, define
+  "setting_1", "setting_2", "setting_3" etc. instead of "setting" (where
+  "setting" is the setting name). See error_bad_syntax in
+  aleabot.conf.default for an example.
+
+
+Bug reports, feature requests and patches
+=========================================
+
+To report a bug or request a feature, send franz1 (#2272489) an in-game kmail,
+or open an issue on the github issue tracker. Code contributions in the
+form of github pull requests are welcome.
+
+https://github.com/aleabot/aleabot/
+
+
+ALEABOT LICENSE
+===============
+
+Copyright (C) 2012-2013 Aleabot
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+PYTHON 2.7.3 LICENSE
+====================
+
+PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
+--------------------------------------------
+
+1. This LICENSE AGREEMENT is between the Python Software Foundation
+("PSF"), and the Individual or Organization ("Licensee") accessing and
+otherwise using this software ("Python") in source or binary form and
+its associated documentation.
+
+2. Subject to the terms and conditions of this License Agreement, PSF hereby
+grants Licensee a nonexclusive, royalty-free, world-wide license to reproduce,
+analyze, test, perform and/or display publicly, prepare derivative works,
+distribute, and otherwise use Python alone or in any derivative version,
+provided, however, that PSF's License Agreement and PSF's notice of copyright,
+i.e., "Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+2011, 2012 Python Software Foundation; All Rights Reserved" are retained in Python
+alone or in any derivative version prepared by Licensee.
+
+3. In the event Licensee prepares a derivative work that is based on
+or incorporates Python or any part thereof, and wants to make
+the derivative work available to others as provided herein, then
+Licensee hereby agrees to include in any such work a brief summary of
+the changes made to Python.
+
+4. PSF is making Python available to Licensee on an "AS IS"
+basis.  PSF MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR
+IMPLIED.  BY WAY OF EXAMPLE, BUT NOT LIMITATION, PSF MAKES NO AND
+DISCLAIMS ANY REPRESENTATION OR WARRANTY OF MERCHANTABILITY OR FITNESS
+FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF PYTHON WILL NOT
+INFRINGE ANY THIRD PARTY RIGHTS.
+
+5. PSF SHALL NOT BE LIABLE TO LICENSEE OR ANY OTHER USERS OF PYTHON
+FOR ANY INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES OR LOSS AS
+A RESULT OF MODIFYING, DISTRIBUTING, OR OTHERWISE USING PYTHON,
+OR ANY DERIVATIVE THEREOF, EVEN IF ADVISED OF THE POSSIBILITY THEREOF.
+
+6. This License Agreement will automatically terminate upon a material
+breach of its terms and conditions.
+
+7. Nothing in this License Agreement shall be deemed to create any
+relationship of agency, partnership, or joint venture between PSF and
+Licensee.  This License Agreement does not grant permission to use PSF
+trademarks or trade name in a trademark sense to endorse or promote
+products or services of Licensee, or any third party.
+
+8. By copying, installing or otherwise using Python, Licensee
+agrees to be bound by the terms and conditions of this License
+Agreement.
+
+
+PYKOL LICENSE
+=============
+
+Software License Agreement (BSD License)
+
+Copyright (c) 2008, Sebastian Celis
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, with or
+without modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the organization nor the names of its contributors may be
+  used to endorse or promote products derived from this software without
+  specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
