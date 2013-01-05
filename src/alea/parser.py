@@ -140,7 +140,15 @@ def aleabot_parse(line):
                 tokens.append(('pow','^'))
             elif c == '<' and pos < len(line) and line[pos] == '3':
                 pos += 1
-                tokens.append(('heart',))
+                tokens.append(('heart_or_smile',))
+            elif c == ':':
+                if pos < len(line) and line[pos] == '-':
+                    pos += 1
+                if pos < len(line) and line[pos] in (')', 'D'):
+                    pos += 1
+                    tokens.append(('heart_or_smile',))
+                else:
+                    raise AleabotSyntaxError('broken smile')
             else:
                 raise AleabotSyntaxError("can't parse symbol: " + c)
             if expect_name:
@@ -315,8 +323,8 @@ def aleabot_parse(line):
     # Top level aleabot_parse() code
     state = alea.util.Expando()
     state.tokens = lexer(line)
-    # if the list of tokens ends with 'heart';'end', remove 'heart'
-    if len(state.tokens) >= 2 and state.tokens[-2][0] == 'heart':
+    # if the list of tokens ends with 'heart_or_smile';'end', remove 'heart_or_smile'
+    if len(state.tokens) >= 2 and state.tokens[-2][0] == 'heart_or_smile':
         state.tokens.pop(-2)
     # if the list of tokens ends with 'sentenceend';'end', remove 'sentenceend'
     if len(state.tokens) >= 2 and state.tokens[-2][0] == 'sentenceend':
