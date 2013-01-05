@@ -1,0 +1,54 @@
+Important directories and files
+===============================
+
+Name                             Purpose
+-------------------------------------------------------------------------------
+./                               Top directory. Typically called 'aleabot'
+                                 or 'aleabot-X.Y.Z' (X.Y.Z = aleabot version)
+./aleabot.conf                   Configuration file
+./bin/                           Contains executable python scripts
+./bin/aleabot.py                 Main bot
+./bin/analysis.py                Simple statistical analysis of the RNG
+./bin/gendefaultconfig.py        Generate aleabot.conf.default
+./doc/                           Contains documentation
+./log/                           Default location for log files
+./pykol/                         pykol (not included in repository)
+./pykol/src/                     pykol source code
+./src/                           Contains our own python modules
+./src/alea/                      Python module "alea"
+./src/alea/AleabotFilter.py      Filter for pykol, implements aleabot
+./src/alea/clan.py               Class for fetching and signing up to a clan
+./src/alea/config.py             Configuration reader and list of settings
+./src/alea/expr.py               Aleatory expression classes and aleabot_eval()
+./src/alea/parser.py             Chat message parser: aleabot_parse()
+./src/alea/rng.py                Random number generator classes
+./src/alea/rolllimiter.py        Time-based dice roll limiter
+./src/alea/util.py               Various utility classes and functions
+./src/alea/__init__.py           Should always be empty
+
+
+
+Portability notes
+=================
+
+Aleabot was developed and has been tested on a GNU/Linux system (Gentoo).
+It should be easily portable to other UNIX-like operating systems,
+and usually no source modification will be needed.
+
+Aleabot has not been tested on Windows.
+
+
+
+How to add a configuration setting
+==================================
+
+- Open src/alea/config.py.
+- Add the new setting to the global variable "settings".
+- Run bin/gendefaultconfig.py and verify that the new aleabot.conf.default
+  looks fine.
+- Modify your local aleabot.conf as needed. Note that every setting MUST be
+  defined in aleabot.conf, even if a default value is given in config.py.
+- Add the code that needs the setting.
+- Commit aleabot.conf.default, src/alea/config.py, and other modified source
+  files.
+

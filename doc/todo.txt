@@ -1,0 +1,9 @@
+Bugs:
+- if a roll in /hobopolis or one of the other dungeon channels is blocked
+  (no dungeon access), the roll is still counted against the per-player and
+  per-channel limit
+
+Feature additions:
+
+Tweaks:
+

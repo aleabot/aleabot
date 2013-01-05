@@ -1,0 +1,100 @@
+Parser Syntax
+=============
+
+(* Start symbol: Request *)
+Request = [ Please ],
+          [ RollRequest | HelpRequest | HelloRequest | ThanksRequest |
+	    WangRequest | ArrowRequest | UneffectRequest ],
+          [ SentenceEnd ] ;
+
+RollRequest = RollCommand, ExpressionList, [ In, ChannelName ] ;
+
+HelpRequest = HelpCommand ;
+
+HelloRequest = HelloCommand ;
+
+ThanksRequest = ThanksCommand, [ PlayerName ] ;
+(* PlayerName is there just to allow variations like "thank you" *)
+
+WangRequest = WangCommand, [ PlayerName ] ;
+
+ArrowRequest = ArrowCommand, [ PlayerName ] ;
+
+UneffectRequest = UneffectCommand, [ EffectName ] ;
+
+ExpressionList = Expression, { ListSeparator, Expression } ;
+
+Expression = Sum ;
+
+Sum = Product | Sum, PlusMinus, Product | PlusMinus, Product ;
+
+Product = Power | Product, MulDiv, Power ;
+
+Power = DiceTerm | DiceTerm, Pow, Power ;
+
+DiceTerm = SimpleExpression | SimpleExpression, Dice, SimpleExpression | Dice,
+SimpleExpression;
+
+SimpleExpression = Number | LParen, Expression, RParen ;
+
+
+
+Lexical tokens
+==============
+
+Please = "please" ;
+
+RollCommand = "roll" | "compute" ;
+
+HelpCommand = "help" ;
+
+HelloCommand = "hello" | "hi" | "hey" ;
+
+ThanksCommand = "thanks" | "thank" | "ty" | "thx" ;
+
+WangCommand = "wang" ;
+
+ArrowCommand = "arrow" ;
+
+UneffectCommand = "uneffect" ;
+
+In = "in" ;
+
+ChannelName = [ "/", { Whitespace } ], NameChar, { NameChar } ;
+PlayerName = NameChar, { NameChar } ;
+EffectName = NameChar, { NameChar } ;
+(*
+  distinguished from each other and from other token types by analyzing context
+  PlayerName "me" is handled as referring to the PMing player him/herself.
+*)
+
+NameChar = Alphabetic | Digit | Whitespace | "_" ;
+
+SentenceEnd = "." | "!" | "?" ;
+
+ListSeparator = "," | ";" | "and" ;
+
+LParen = "(" ;
+
+RParen = ")" ;
+
+PlusMinus = "+" | "-" ;
+
+MulDiv = "*" | "/" | "%" ;
+
+Pow = "**" | "^" ;
+
+Dice = "d" ;
+
+Number = Digit, { Digit }, [ Unit ] ;
+
+
+Alphabetic = "A" | "B" | ... | "Z" | "a" | "b" | ... | "z" ;
+Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+Unit = "k" | "m" | "b" ;
+Whitespace = " " | "\t" | ... ;
+
+
+Whitespace separates tokens. All tokens are case insensitive.
+
+
