@@ -138,6 +138,9 @@ def aleabot_parse(line):
                 tokens.append(('muldiv','%'))
             elif c == '^':
                 tokens.append(('pow','^'))
+            elif c == '<' and pos < len(line) and line[pos] == '3':
+                pos += 1
+                tokens.append(('heart',))
             else:
                 raise AleabotSyntaxError("can't parse symbol: " + c)
             if expect_name:
@@ -312,6 +315,9 @@ def aleabot_parse(line):
     # Top level aleabot_parse() code
     state = alea.util.Expando()
     state.tokens = lexer(line)
+    # if the list of tokens ends with 'heart';'end', remove 'heart'
+    if len(state.tokens) >= 2 and state.tokens[-2][0] == 'heart':
+        state.tokens.pop(-2)
     # if the list of tokens ends with 'sentenceend';'end', remove 'sentenceend'
     if len(state.tokens) >= 2 and state.tokens[-2][0] == 'sentenceend':
         state.tokens.pop(-2)
