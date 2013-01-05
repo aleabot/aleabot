@@ -58,11 +58,7 @@ How to set up Aleabot:
 
   Aleabot uses the "rollover" state in kol.bot.Bot, which is at the time
   of writing not available in pykol. Clone the following repository instead:
-    "git clone https://github.com/aleabot/pykol.git"
-  and switch to the rolloverstate branch:
-    "cd pykol"
-    "git checkout rolloverstate"
-    "cd .."
+    "git clone -b rolloverstate https://github.com/aleabot/pykol.git"
 
 - Run bin/aleabot.py.
 
@@ -89,7 +85,7 @@ The configuration file consists of 4 sections:
   (such as %P for the name of the player who sent the request to aleabot)
   in most of the settings here.
 
-  If you want to define multiple values for one settings, of which one
+  If you want to define multiple values for one setting, of which one
   should be chosen at random each time the setting is needed, define
   "setting_1", "setting_2", "setting_3" etc. instead of "setting" (where
   "setting" is the setting name). See error_bad_syntax in
