@@ -87,6 +87,18 @@ def doFilter(eventName, context, **kwargs):
         returnCode = botProcessKmail(context, **kwargs)
     elif eventName == 'botEndCycle':
         returnCode = botEndCycle(context, **kwargs)
+    elif eventName == 'botPreLogin':
+        returnCode = botPreLogin(context, **kwargs)
+    return returnCode
+
+
+def botPreLogin(context, **kwargs):
+    returnCode = FilterManager.CONTINUE
+    bot = kwargs['bot']
+
+    # Make sure a MailboxManager is created
+    bot.params['doWork:kmail'] = True
+
     return returnCode
 
 

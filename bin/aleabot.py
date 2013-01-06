@@ -58,6 +58,7 @@ if __name__ == '__main__':
     FilterManager.registerFilterForEvent(alea.AleabotFilter, "botProcessChat")
     FilterManager.registerFilterForEvent(alea.AleabotFilter, "botProcessKmail")
     FilterManager.registerFilterForEvent(alea.AleabotFilter, "botEndCycle")
+    FilterManager.registerFilterForEvent(alea.AleabotFilter, "botPreLogin")
 
     # Start the bot manager
     BotManager.init()
