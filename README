@@ -54,12 +54,6 @@ How to set up Aleabot:
     "git clone https://github.com/scelis/pykol.git"
   from the top aleabot directory.
 
-  TEMPORARY NOTE
-
-  Aleabot uses the "rollover" state in kol.bot.Bot, which is at the time
-  of writing not available in pykol. Clone the following repository instead:
-    "git clone -b rolloverstate https://github.com/aleabot/pykol.git"
-
 - Run bin/aleabot.py.
 
 
