@@ -147,8 +147,8 @@ def botProcessKmail(context, **kwargs):
     message = kwargs['kmail']
     bot = kwargs['bot']
 
-    user_name = message['userName']
-    user_id = message['userId']
+    user_name = str(message['userName'])
+    user_id = str(message['userId'])
     cmd = BotUtils.getKmailCommand(message)
     meat = message['meat']
     items = message['items']
@@ -170,7 +170,7 @@ def botProcessKmail(context, **kwargs):
             # Everything is okay
             try:
                 Report.info('bot', 'Firing arrow at player: ' + user_name)
-                arrowreq = CursePlayerRequest(bot.session, str(user_id), ITEM_ID_ARROW)
+                arrowreq = CursePlayerRequest(bot.session, user_id, ITEM_ID_ARROW)
                 arrowreq.doRequest()
                 return_goodies = False
             except Error.Error as err:
@@ -238,7 +238,7 @@ def botProcessKmail(context, **kwargs):
     if send_heart:
         try:
             Report.info('bot', 'Sending candy heart to player: ' + user_name)
-            heartreq = CursePlayerRequest(bot.session, str(user_id), ITEM_ID_CANDYHEART)
+            heartreq = CursePlayerRequest(bot.session, user_id, ITEM_ID_CANDYHEART)
             heartreq.requestData['texta'] = 'THANK'
             heartreq.requestData['textb'] = 'YOU'
             heartreq.doRequest()
@@ -269,7 +269,7 @@ def botProcessChat(context, **kwargs):
         exprresults = []
         channel = ''
         clan = alea.clan.Clan(0, '')
-        target_id = 0
+        target_id = '0'
         target_name = ''
         uneffectable = alea.util.Uneffectable('')
         msg = ''
@@ -352,16 +352,16 @@ def botProcessChat(context, **kwargs):
                         target_id = user_id
                     else:
                         target_name = request[1]
-                        target_id = whois(bot, target_name)
+                        target_id = str(whois(bot, target_name))
 
                     # Check limits
                     # Use 'rollover' bot state which is cleared each rollover
                     state = bot.states['rollover']
-                    wang_sender_count_key = 'wang_sender_count_' + str(user_id)
+                    wang_sender_count_key = 'wang_sender_count_' + user_id
                     wang_sender_count = state.get(wang_sender_count_key, 0)
-                    wang_target_count_key = 'wang_target_count_' + str(target_id)
+                    wang_target_count_key = 'wang_target_count_' + target_id
                     wang_target_count = state.get(wang_target_count_key, 0)
-                    if target_id == bot.session.userId:
+                    if target_id == str(bot.session.userId):
                         msg = aleabot.config.get('error_wang_self')
                     elif wang_sender_count >= aleabot.config.get('wang_sender_limit'):
                         msg = aleabot.config.get('error_wang_sender_limit')
@@ -371,7 +371,7 @@ def botProcessChat(context, **kwargs):
 
                         # Limits not reached yet. Slap!
                         Report.info('bot', 'Slapping player with wang: ' + target_name)
-                        wangreq = CursePlayerRequest(bot.session, str(target_id), ITEM_ID_WANG)
+                        wangreq = CursePlayerRequest(bot.session, target_id, ITEM_ID_WANG)
                         wangreq.doRequest()
                         if target_id == user_id:
                             msg = aleabot.config.get('wangtext_self')
@@ -399,14 +399,14 @@ def botProcessChat(context, **kwargs):
                         target_id = user_id
                     else:
                         target_name = request[1]
-                        target_id = whois(bot, target_name)
+                        target_id = str(whois(bot, target_name))
 
                     # Check limits
                     # Use 'rollover' bot state which is cleared each rollover
                     state = bot.states['rollover']
-                    arrow_sender_count_key = 'arrow_sender_count_' + str(user_id)
+                    arrow_sender_count_key = 'arrow_sender_count_' + user_id
                     arrow_sender_count = state.get(arrow_sender_count_key, 0)
-                    if target_id == bot.session.userId:
+                    if target_id == str(bot.session.userId):
                         msg = aleabot.config.get('error_arrow_self')
                     elif arrow_sender_count >= aleabot.config.get('arrow_sender_limit'):
                         msg = aleabot.config.get('error_arrow_sender_limit')
@@ -414,7 +414,7 @@ def botProcessChat(context, **kwargs):
 
                         # Limits not reached yet. Fire!
                         Report.info('bot', 'Firing arrow at player: ' + target_name)
-                        arrowreq = CursePlayerRequest(bot.session, str(target_id), ITEM_ID_ARROW)
+                        arrowreq = CursePlayerRequest(bot.session, target_id, ITEM_ID_ARROW)
                         arrowreq.doRequest()
                         if target_id == user_id:
                             msg = aleabot.config.get('arrowtext_self')
@@ -539,9 +539,9 @@ def format_reply(msg,
     msg_final = ''
     for part in re.split(r'(%[ERPpCcUT%])', msg):
         if part == '%P':
-            msg_final += str(user_name)
+            msg_final += user_name
         elif part == '%p':
-            msg_final += str(user_id)
+            msg_final += user_id
         elif part == '%E':
             msg_final += ', '.join([str(expr) for expr in exprlist])
         elif part == '%R':

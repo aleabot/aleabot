@@ -30,8 +30,8 @@ class ClanRequestError(Exception):
 
 class Clan(object):
     def __init__(self, clanId, clanName):
-        self._clanId = clanId
-        self._clanName = clanName
+        self._clanId = int(clanId)
+        self._clanName = str(clanName)
 
     def valid(self):
         return self._clanId != 0 and self._clanName != ''
