@@ -101,6 +101,7 @@ def aleabot_parse(line):
                 elif keyword == 'arrow':
                     tokens.append(('arrowcommand',))
                     expect_name = True
+                    expect_name_multiword = True
                 elif keyword == 'uneffect':
                     tokens.append(('uneffectcommand',))
                     expect_name = True
@@ -170,10 +171,12 @@ def aleabot_parse(line):
                 # channel name for rollrequest
                 # player name for wangrequest and arrowrequest
                 # effect name for uneffectrequest
+                while pos < len(line) and line[pos] == ' ':
+                    pos += 1
                 if expect_name_ignore_slash:
-                    while pos < len(line) and line[pos].isspace():
-                        pos += 1
                     if pos < len(line) and line[pos] == '/':
+                        pos += 1
+                    while pos < len(line) and line[pos] == ' ':
                         pos += 1
                 pos_namestart = pos
                 namechars = alphabetic + digits + '_'
