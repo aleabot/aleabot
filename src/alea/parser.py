@@ -130,7 +130,7 @@ def aleabot_parse(line):
             elif c == '-':
                 tokens.append(('plusminus','-'))
             elif c == '*':
-                if line[pos] == '*':
+                if pos < len(line) and line[pos] == '*':
                     pos += 1
                     tokens.append(('pow','^'))
                 else:
