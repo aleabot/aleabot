@@ -57,11 +57,11 @@ def aleabot_parse(line):
         digits = '0123456789'
         alphabetic = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         alphabetic += alphabetic.lower()
-        namechars = alphabetic + digits + ' _'
         tokens = []
         pos = 0
         expect_name = False
         expect_name_ignore_slash = False
+        expect_name_multiword = False
         # Normalize whitespace
         line = re.sub(r'\s+', ' ', line).strip()
         # Scan the line
@@ -84,15 +84,18 @@ def aleabot_parse(line):
                 elif keyword == 'thanks' or keyword == 'thank' or keyword == 'ty' or keyword == 'thx':
                     tokens.append(('thankscommand',))
                     expect_name = True
+                    expect_name_multiword = True
                 elif keyword == 'wang':
                     tokens.append(('wangcommand',))
                     expect_name = True
+                    expect_name_multiword = True
                 elif keyword == 'arrow':
                     tokens.append(('arrowcommand',))
                     expect_name = True
                 elif keyword == 'uneffect':
                     tokens.append(('uneffectcommand',))
                     expect_name = True
+                    expect_name_multiword = True
                 elif keyword == 'in':
                     tokens.append(('in',))
                     expect_name = True
@@ -161,12 +164,16 @@ def aleabot_parse(line):
                     if pos < len(line) and line[pos] == '/':
                         pos += 1
                 pos_namestart = pos
+                namechars = alphabetic + digits + '_'
+                if expect_name_multiword:
+                    namechars += ' '
                 while pos < len(line) and line[pos] in namechars:
                     pos += 1
                 name = line[pos_namestart:pos].strip()
                 tokens.append(('name', name))
                 expect_name = False
                 expect_name_ignore_slash = False
+                expect_name_multiword = False
             while pos < len(line) and line[pos].isspace():
                 pos += 1
         tokens.append(('end',))
@@ -185,8 +192,9 @@ def aleabot_parse(line):
     # The recursive descent parser for the request syntax follows.
     # Each function implements a production rule.
     def parse_request(state):
-        if is_token(state, 'please'):
-            advance(state)
+        # Note that initial and final tokens such as 'please',
+        # 'sentenceend', 'heart_or_smile' have already been removed
+        # by the main parser function
         if is_token(state, 'rollcommand'):
             advance(state)
             expressionlist = parse_expressionlist(state)
@@ -323,12 +331,21 @@ def aleabot_parse(line):
     # Top level aleabot_parse() code
     state = alea.util.Expando()
     state.tokens = lexer(line)
+    # if the list of tokens start with 'please', remove 'please'
+    if len(state.tokens) >= 1 and state.tokens[0][0] == 'please':
+        state.tokens.pop(0)
     # if the list of tokens ends with 'heart_or_smile';'end', remove 'heart_or_smile'
     if len(state.tokens) >= 2 and state.tokens[-2][0] == 'heart_or_smile':
         state.tokens.pop(-2)
     # if the list of tokens ends with 'sentenceend';'end', remove 'sentenceend'
     if len(state.tokens) >= 2 and state.tokens[-2][0] == 'sentenceend':
         state.tokens.pop(-2)
+    # if the list of tokens ends with 'please';'end', remove 'please'
+    if len(state.tokens) >= 2 and state.tokens[-2][0] == 'please':
+        state.tokens.pop(-2)
+        # if there was a 'listseparator' before the please, remove it too
+        if len(state.tokens) >= 2 and state.tokens[-2][0] == 'listseparator':
+            state.tokens.pop(-2)
     state.tokenpos = 0
     return parse_request(state)
 

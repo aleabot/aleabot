@@ -5,7 +5,7 @@ Parser Syntax
 Request = [ Please ],
           [ RollRequest | HelpRequest | HelloRequest | ThanksRequest |
 	    WangRequest | ArrowRequest | UneffectRequest ],
-          [ SentenceEnd ] [ HeartOrSmile ] ;
+          [ [ ListSeparator ] Please ] [ SentenceEnd ] [ HeartOrSmile ] ;
 
 RollRequest = RollCommand, ExpressionList, [ In, ChannelName ] ;
 
