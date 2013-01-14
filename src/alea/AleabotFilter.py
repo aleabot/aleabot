@@ -124,6 +124,9 @@ def botEndCycle(context, **kwargs):
             Report.info('bot', 'Clan state update successful.')
             Report.trace('bot', 'I am in clan: ' + repr(aleabot.clanstate.my_clan()))
             Report.trace('bot', 'I have ' + str(len(aleabot.clanstate.my_whitelists())) + ' whitelists')
+            # Set timer to switch back to home clan
+            if aleabot.home_clan_timer < 0:
+                aleabot.home_clan_timer = 0
     except alea.clan.ClanRequestError as err:
         Report.error('Unable to update clan state! Error: ' + str(err))
 
@@ -133,7 +136,7 @@ def botEndCycle(context, **kwargs):
         if aleabot.home_clan_timer >= aleabot.config.get('home_clan_delay'):
             aleabot.home_clan_timer = -1
             home_clan_id = aleabot.config.get('home_clan_id')
-            if home_clan_id > 0:
+            if home_clan_id > 0 and aleabot.clanstate.my_clan().id() != home_clan_id:
                 Report.info('bot', 'Switching back to home clan.')
                 try:
                     aleabot.clanstate.switch(alea.clan.Clan(home_clan_id, ''))
