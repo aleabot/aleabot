@@ -45,13 +45,15 @@ sections = [
             Variables that may be used in responses:
                 %P = player name
                 %p = player ID
+                %X = Xpovos = date and time (UTC)
             Roll request responses only:
                 %E = expression list
                 %R = result list
                 %C = channel
                 %c = clan
-            Wang and arrow request responses only:
-                %T = target
+            Wang, arrow and roll verify request responses only:
+                %T = target name
+                %t = target ID
             Uneffect request responses only:
                 %U = matching effect names
 
@@ -100,6 +102,9 @@ settings = [
             """Number of seconds to wait before switching back to home clan."""),
         ('bot', 'home_clan_id', 'int', 2046985919,
             """Clan ID of the bot's home clan"""),
+
+        ('bot', 'rollverify_count', 'int', 20,
+            """Number of entries in roll verification mail"""),
 
         ('bot', 'report_level', 'int', 500,
             """Console report level
@@ -184,6 +189,10 @@ settings = [
             ['You\'re welcome! Anything else I can do for you?'],
             """Response for thanksrequest"""),
 
+        ('chatter', 'timetext', 'stringchoice',
+            ['It is currently %X.'],
+            """Response for timerequest"""),
+
         ('chatter', 'wangtext', 'stringchoice',
             ['%T has been slapped with a wang.'],
             """Response for wangrequest"""),
@@ -223,6 +232,19 @@ settings = [
         ('chatter', 'kmailtext_quote_ronin', 'stringchoice',
             ['You sent some items and meat which I tried to return, but you are in Hardcore or Ronin. Contact franz1 (#2272489) if you need them back.\nHere is a copy of your message:'],
             """Like kmailtext_quote, if unable to send back items/meat due to Ronin or Hardcore"""),
+
+        ('chatter', 'rollverify_header', 'stringchoice',
+            ['Roll verification mail for %T (#%t), it is currently %X'],
+            """Header of roll verification mail"""),
+        ('chatter', 'rollverify_entry_private', 'stringchoice',
+            ['%X %E > %R'],
+            """Entry of roll verification mail (private roll)"""),
+        ('chatter', 'rollverify_entry_public', 'stringchoice',
+            ['%X %E > %R in %C'],
+            """Entry of roll verification mail (public roll)"""),
+        ('chatter', 'rollverify_entry_clan', 'stringchoice',
+            ['%X %E > %R in %C (%c)'],
+            """Entry of roll verification mail (clan roll)"""),
 
         ('chatter', 'error_generic', 'stringchoice',
             ['I am Error. *BEEP* *CRASH* *ZOT* *BEEP*'],
@@ -327,6 +349,10 @@ settings = [
         ('chatter', 'error_uneffect_generic', 'stringchoice',
             ['Unable to remove effect for unknown reason.'],
             """Error message when uneffect request failed for some unknown reason"""),
+
+        ('chatter', 'error_rollverify_player_not_found', 'stringchoice',
+            ['That player doesn\'t exist.'],
+            """Error message when target player is unknown"""),
 
         ('chatter', 'error_bad_syntax', 'stringchoice',
             [

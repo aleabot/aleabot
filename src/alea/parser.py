@@ -37,9 +37,12 @@ def aleabot_parse(line):
     #     - expressionlist is a list of expression objects
     #     - for public rolls, channelname is the name of the chat channel
     #       (without initial slash), for private rolls, channelname = ''
+    #   ('rollverifyrequest', playername)
+    #     - playername is the name of the player (not yet resolved to user id)
     #   ('helprequest')
     #   ('hellorequest')
     #   ('thanksrequest')
+    #   ('timerequest')
     #   ('wangrequest', playername)
     #     - playername is the name of the player (not yet resolved to user id)
     #   ('arrowrequest', playername)
@@ -77,6 +80,10 @@ def aleabot_parse(line):
                 keyword = line[pos1:pos2].lower()
                 if keyword == 'roll' or keyword == 'compute':
                     tokens.append(('rollcommand',))
+                elif keyword == 'verify':
+                    tokens.append(('verify',))
+                    expect_name = True
+                    expect_name_multiword = True
                 elif keyword == 'help':
                     tokens.append(('helpcommand',))
                 elif keyword == 'hello' or keyword == 'hi' or keyword == 'hey':
@@ -85,6 +92,8 @@ def aleabot_parse(line):
                     tokens.append(('thankscommand',))
                     expect_name = True
                     expect_name_multiword = True
+                elif keyword == 'time' or keyword == 'date':
+                    tokens.append(('timecommand',))
                 elif keyword == 'wang':
                     tokens.append(('wangcommand',))
                     expect_name = True
@@ -197,17 +206,25 @@ def aleabot_parse(line):
         # by the main parser function
         if is_token(state, 'rollcommand'):
             advance(state)
-            expressionlist = parse_expressionlist(state)
-            if is_token(state, 'in'):
+            if is_token(state, 'verify'):
                 advance(state)
-                # Parse the channel name (don't check for authorization yet)
                 if is_token(state, 'name'):
-                    channel = get_token_parameter(state)
+                    target = get_token_parameter(state)
                     advance(state)
                     if is_token(state, 'end'):
-                        return ('rollrequest', expressionlist, channel)
-            elif is_token(state, 'end'):
-                return ('rollrequest', expressionlist, '')
+                        return ('rollverifyrequest', target)
+            else:
+                expressionlist = parse_expressionlist(state)
+                if is_token(state, 'in'):
+                    advance(state)
+                    # Parse the channel name (don't check for authorization yet)
+                    if is_token(state, 'name'):
+                        channel = get_token_parameter(state)
+                        advance(state)
+                        if is_token(state, 'end'):
+                            return ('rollrequest', expressionlist, channel)
+                elif is_token(state, 'end'):
+                    return ('rollrequest', expressionlist, '')
             raise AleabotSyntaxError('unable to parse roll request')
         elif is_token(state, 'helpcommand'):
             advance(state)
@@ -223,17 +240,20 @@ def aleabot_parse(line):
             advance(state)
             if is_token(state, 'name'):
                 playername = get_token_parameter(state)
-                if playername == '' or playername.lower() == 'you' or playername.lower() == 'to you' or playername == 'u' or playername.lower() == 'aleabot' or playername.lower() == 'alea':
+                if playername == '' or playername.lower() == 'you' or playername.lower() == 'to you' or playername == 'u' or playername.lower() == 'aleabot' or playername.lower() == 'alea' or playername.lower() == 'you aleabot':
                     advance(state)
                     if is_token(state, 'end'):
                         return ('thanksrequest',)
             raise AleabotSyntaxError('unable to parse thanks request')
+        elif is_token(state, 'timecommand'):
+            advance(state)
+            if is_token(state, 'end'):
+                return ('timerequest',)
+            raise AleabotSyntaxError('unable to parse time request')
         elif is_token(state, 'wangcommand'):
             advance(state)
             if is_token(state, 'name'):
                 playername = get_token_parameter(state)
-                if playername.lower() == 'me':
-                    playername = ''
                 advance(state)
                 if is_token(state, 'end'):
                     return ('wangrequest', playername)
@@ -242,8 +262,6 @@ def aleabot_parse(line):
             advance(state)
             if is_token(state, 'name'):
                 playername = get_token_parameter(state)
-                if playername.lower() == 'me':
-                    playername = ''
                 advance(state)
                 if is_token(state, 'end'):
                     return ('arrowrequest', playername)

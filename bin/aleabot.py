@@ -39,6 +39,9 @@ if __name__ == '__main__':
     # Create a random number generator
     rng = alea.rng.RNG()
 
+    # Change to basepath (makes sure state files are saved in basepath)
+    os.chdir(basepath)
+
     # Load the config file
     config = alea.config.AleabotConfig(rng)
     config.load(basepath)

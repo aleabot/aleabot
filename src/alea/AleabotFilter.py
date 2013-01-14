@@ -30,6 +30,7 @@ from kol.request.UserProfileRequest import UserProfileRequest
 from kol.bot import BotUtils
 from kol.util import Report
 import re
+import time
 import alea.clan
 import alea.parser
 import alea.rng
@@ -149,6 +150,7 @@ def botProcessKmail(context, **kwargs):
 
     user_name = str(message['userName'])
     user_id = str(message['userId'])
+    current_time = time.time()
     cmd = BotUtils.getKmailCommand(message)
     meat = message['meat']
     items = message['items']
@@ -215,7 +217,7 @@ def botProcessKmail(context, **kwargs):
         Report.info('bot', 'Responding to kmail')
         response_kmail = {}
         response_kmail['userId'] = message['userId']
-        response_kmail['text'] = format_reply(response + '\n\n' + aleabot.config.get('kmailtext_quote'), user_name, user_id) + '\n' + quote_kmail(message)
+        response_kmail['text'] = format_reply(response + '\n\n' + aleabot.config.get('kmailtext_quote'), user_name=user_name, user_id=user_id, current_time=current_time) + '\n' + quote_kmail(message)
         if return_goodies:
             response_kmail['items'] = items
             response_kmail['meat'] = meat
@@ -226,7 +228,7 @@ def botProcessKmail(context, **kwargs):
                 Report.error('bot', 'Tried to send items and meat back, but user is in Hardcore or Ronin!')
                 response_kmail2 = {}
                 response_kmail2['userId'] = message['userId']
-                response_kmail2['text'] = format_reply(response + '\n\n' + aleabot.config.get('kmailtext_quote_ronin'), user_name, user_id) + '\n' + quote_kmail(message)
+                response_kmail2['text'] = format_reply(response + '\n\n' + aleabot.config.get('kmailtext_quote_ronin'), user_name=user_name, user_id=user_id, curent_time=current_time) + '\n' + quote_kmail(message)
                 try:
                     bot.sendKmail(response_kmail2)
                 except Error.Error as err2:
@@ -265,12 +267,13 @@ def botProcessChat(context, **kwargs):
         # Initialize variables for response formatting
         user_name = str(chat['userName'])
         user_id = str(chat['userId'])
+        current_time = time.time()
         exprlist = []
         exprresults = []
         channel = ''
         clan = alea.clan.Clan(0, '')
-        target_id = '0'
         target_name = ''
+        target_id = '0'
         uneffectable = alea.util.Uneffectable('')
         msg = ''
 
@@ -323,14 +326,89 @@ def botProcessChat(context, **kwargs):
                         raise ChannelDisallowedError(channel)
 
                 # Apply time-based limits
-                aleabot.rolllimiter.check(channel, user_id, clan.id(), aleabot.config)
+                aleabot.rolllimiter.check(channel, user_id, clan.id(),
+                        current_time, aleabot.config)
 
                 # Evaluate dice expressions
                 exprresults = alea.expr.aleabot_eval(exprlist,
                         channel != '', aleabot.rng, aleabot.config)
 
                 # Update time-based roll limiter
-                aleabot.rolllimiter.update(channel, user_id, clan.id(), aleabot.config)
+                aleabot.rolllimiter.update(channel, user_id, clan.id(),
+                        current_time, aleabot.config)
+
+                # Record roll and result in roll verification list
+                state = bot.states['global']
+                rollverify_key = 'rollverify_' + user_id
+                if rollverify_key not in state:
+                    state[rollverify_key] = []
+                state[rollverify_key].insert(0, (
+                    current_time,
+                    [str(x) for x in exprlist],
+                    [str(x) for x in exprresults],
+                    str(channel),
+                    str(clan.name())))
+                rollverify_count = aleabot.config.get('rollverify_count')
+                state[rollverify_key] = state[rollverify_key][0:rollverify_count]
+                bot.writeState('global')
+
+            elif request[0] == 'rollverifyrequest':
+                # Handle a roll verification request
+                try:
+                    target_name, target_id = resolve_target(bot,
+                            user_name, user_id, request[1])
+
+                    # Get config settings
+                    rollverify_count = aleabot.config.get('rollverify_count')
+                    rollverify_header = aleabot.config.get('rollverify_header')
+                    rollverify_entry_private = aleabot.config.get('rollverify_entry_private')
+                    rollverify_entry_public = aleabot.config.get('rollverify_entry_public')
+                    rollverify_entry_clan = aleabot.config.get('rollverify_entry_clan')
+                    
+                    # Get saved list of rolls
+                    state = bot.states['global']
+                    rollverify_key = 'rollverify_' + target_id
+                    rolls = state.get(rollverify_key, [])
+                    rolls = rolls[0:rollverify_count]
+
+                    # Build kmail
+                    rollverify_kmail = {}
+                    rollverify_kmail['userId'] = user_id
+                    rollverify_kmail['text'] = format_reply(rollverify_header,
+                            user_name=user_name,
+                            user_id=user_id,
+                            current_time=current_time,
+                            target_name=target_name,
+                            target_id=target_id)
+                    rollverify_kmail['text'] += '\n\n'
+                    for roll in rolls:
+                        if roll[4] != '':  # clan != ''
+                            rollverify_entry = rollverify_entry_clan
+                        elif roll[3] != '':  # channel != ''
+                            rollverify_entry = rollverify_entry_public
+                        else:
+                            rollverify_entry = rollverify_entry_private
+                        rollverify_kmail['text'] += format_reply(rollverify_entry,
+                                user_name=user_name,
+                                user_id=user_id,
+                                current_time=roll[0],
+                                target_name=target_name,
+                                target_id=target_id,
+                                exprlist=roll[1],
+                                exprresults=roll[2],
+                                channel=roll[3],
+                                clan=roll[4])
+                        rollverify_kmail['text'] += '\n'
+
+                    # Try to send the kmail
+                    bot.sendKmail(rollverify_kmail)
+
+                except Error.Error as err:
+                    if err.code == Error.USER_NOT_FOUND:
+                        msg = aleabot.config.get('error_rollverify_player_not_found')
+                    else:
+                        msg = aleabot.config.get('error_generic')
+
 
             elif request[0] == 'helprequest':
                 # Handle a help request
@@ -344,15 +422,15 @@ def botProcessChat(context, **kwargs):
                 # Handle a thanks request
                 msg = aleabot.config.get('thankstext')
 
+            elif request[0] == 'timerequest':
+                # Handle a time request
+                msg = aleabot.config.get('timetext')
+
             elif request[0] == 'wangrequest':
                 # Handle a wang request
                 try:
-                    if request[1] == '':
-                        target_name = user_name
-                        target_id = user_id
-                    else:
-                        target_name = request[1]
-                        target_id = str(whois(bot, target_name))
+                    target_name, target_id = resolve_target(bot,
+                            user_name, user_id, request[1])
 
                     # Check limits
                     # Use 'rollover' bot state which is cleared each rollover
@@ -394,12 +472,8 @@ def botProcessChat(context, **kwargs):
             elif request[0] == 'arrowrequest':
                 # Handle an arrow request
                 try:
-                    if request[1] == '':
-                        target_name = user_name
-                        target_id = user_id
-                    else:
-                        target_name = request[1]
-                        target_id = str(whois(bot, target_name))
+                    target_name, target_id = resolve_target(bot,
+                            user_name, user_id, request[1])
 
                     # Check limits
                     # Use 'rollover' bot state which is cleared each rollover
@@ -498,9 +572,16 @@ def botProcessChat(context, **kwargs):
 
         # Format reply message
         msg = format_reply(msg,
-                user_name, user_id,
-                exprlist, exprresults, channel, clan,
-                target_name, uneffectable)
+                user_name=user_name,
+                user_id=user_id,
+                current_time=current_time,
+                exprlist=exprlist,
+                exprresults=exprresults,
+                channel=channel,
+                clan=clan,
+                target_name=target_name,
+                target_id=target_id,
+                uneffectable=uneffectable)
 
         # Chat!
         if msg != '':
@@ -532,28 +613,35 @@ def botProcessChat(context, **kwargs):
 
     return returnCode
 
-def format_reply(msg,
-        user_name, user_id,
-        exprlist=[], exprresults=[], channel='', clan=None,
-        target_name='', uneffectable=None):
+def format_reply(msg, **kwargs):
     msg_final = ''
-    for part in re.split(r'(%[ERPpCcUT%])', msg):
+    for part in re.split(r'(%[PpXERCcUTt%])', msg):
         if part == '%P':
-            msg_final += user_name
+            msg_final += str(kwargs.get('user_name', ''))
         elif part == '%p':
-            msg_final += user_id
+            msg_final += str(kwargs.get('user_id', ''))
+        elif part == '%X':
+            current_time = float(kwargs.get('current_time', 0.0))
+            tm = time.gmtime(current_time)
+            msg_final += '%d/%d/%d %d:%02dz' % (tm.tm_mday, tm.tm_mon, tm.tm_year%100, tm.tm_hour, tm.tm_min)
         elif part == '%E':
-            msg_final += ', '.join([str(expr) for expr in exprlist])
+            l = kwargs.get('exprlist', [])
+            msg_final += ', '.join(str(x) for x in l)
         elif part == '%R':
-            msg_final += ', '.join([str(x) for x in exprresults])
+            l = kwargs.get('exprresults', [])
+            msg_final += ', '.join(str(x) for x in l)
         elif part == '%C':
-            msg_final += str(channel)
+            msg_final += str(kwargs.get('channel', ''))
         elif part == '%c':
+            clan = kwargs.get('clan', None)
             if clan is not None:
-                msg_final += str(clan.name())
+                msg_final += str(clan)
         elif part == '%T':
-            msg_final += str(target_name)
+            msg_final += str(kwargs.get('target_name', ''))
+        elif part == '%t':
+            msg_final += str(kwargs.get('target_id', ''))
         elif part == '%U':
+            uneffectable = kwargs.get('uneffectable', None)
             if uneffectable is not None:
                 msg_final += ', '.join(uneffectable.effect_names())
         elif part == '%%':
@@ -562,21 +650,23 @@ def format_reply(msg,
             msg_final += part
     return msg_final
 
+def resolve_target(bot, user_name, user_id, target_name):
+    if target_name == '' or target_name.lower() == 'me':
+        return (user_name, user_id)
+    else:
+        return whois(bot, target_name)
+
 def whois(bot, name):
     Report.trace('bot', 'Whois: ' + name)
-    # If name is already a numeric ID: No need to talk to server
-    if re.match(r'[0-9]+', name):
-        player_id = int(name)
-        Report.trace('bot', 'Whois resolved locally: ' + str(player_id))
-        return player_id
-    # Otherwise, do a /whois and try to understand the response
     response = bot.sendChatMessage('/whois ' + name)
     responsetext = ''.join(x['text'] for x in response)
-    match = re.search(r'<a target=mainpane href="showplayer\.php\?who=([0-9]+)">', responsetext)
+    match = re.search(r'<a[^>]*showplayer.php[^>]*><b[^>]*>([A-Za-z0-9_ ]+) \(#([0-9]+)\)</b></a>', responsetext)
     if match:
-        player_id = int(match.group(1))
-        Report.trace('bot', 'Whois resolved: ' + str(player_id))
-        return player_id
+        player_name = match.group(1)
+        player_id = match.group(2)
+        Report.trace('bot', 'Whois resolved: Name: ' + str(player_name))
+        Report.trace('bot', 'Whois resolved: ID: ' + str(player_id))
+        return player_name, player_id
     elif 'Unknown Player: ' in responsetext:
         raise Error.Error("That player could not be found.", Error.USER_NOT_FOUND)
     else:

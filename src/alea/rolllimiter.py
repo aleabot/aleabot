@@ -16,7 +16,6 @@
 #
 
 
-import time
 import alea.util
 
 class RollLimitError(Exception):
@@ -50,9 +49,9 @@ class RollLimiter(object):
         self._private_perplayer = {}
         self._private_perplayer_burst = {}
         self._clockskew = False
-    def check(self, channel, userId, clanId, aleabot_config):
+    def check(self, channel, userId, clanId, currentTime, aleabot_config):
         # clanId must be 0 if channel is not a clan channel
-        t = time.time()
+        t = currentTime
         if channel == '':
             # Private roll
             private_perplayer_limit = aleabot_config.get('private_perplayer_limit')
@@ -81,9 +80,9 @@ class RollLimiter(object):
         result = self._clockskew
         self._clockskew = False
         return result
-    def update(self, channel, userId, clanId, aleabot_config):
+    def update(self, channel, userId, clanId, currentTime, aleabot_config):
         # clanId must be 0 if channel is not a clan channel
-        t = time.time()
+        t = currentTime
         if channel == '':
             # Private roll
             oldt = self._private_perplayer.get(userId, None)
@@ -105,39 +104,41 @@ class RollLimiter(object):
 
 if __name__ == '__main__':
     import readline
+    import time
     import alea.config
     import alea.rng
-    aleabot_config = alea.config.AleabotConfig(alea.rng.RNG())
-    aleabot_config.load_defaults()
-    aleabot_config.set('private_perplayer_limit', 10)
-    aleabot_config.set('private_perplayer_burst', 5)
-    aleabot_config.set('public_perplayer_limit', 600)
-    aleabot_config.set('public_perchannel_limit', 60)
+    config = alea.config.AleabotConfig(alea.rng.RNG())
+    config.load_defaults()
+    config.set('private_perplayer_limit', 10)
+    config.set('private_perplayer_burst', 5)
+    config.set('public_perplayer_limit', 600)
+    config.set('public_perchannel_limit', 60)
     limiter = RollLimiter()
     while True:
         s = raw_input('--> ')
         fields = s.split()
+        currentTime = time.time()
         try:
             if len(fields) == 0:
                 pass
             elif len(fields) == 1:
                 userId = int(fields[0])
                 print 'Private roll for player ' + str(userId)
-                limiter.check('', userId, 0, aleabot_config)
-                limiter.update('', userId, 0, aleabot_config)
+                limiter.check('', userId, 0, currentTime, config)
+                limiter.update('', userId, 0, currentTime, config)
             elif len(fields) == 2:
                 channel = fields[0]
                 userId = int(fields[1])
                 print 'Public roll in channel ' + channel + ' for player ' + str(userId)
-                limiter.check(channel, userId, 0, aleabot_config)
-                limiter.update(channel, userId, 0, aleabot_config)
+                limiter.check(channel, userId, 0, currentTime, config)
+                limiter.update(channel, userId, 0, currentTime, config)
             else:
                 channel = fields[0]
                 userId = int(fields[1])
                 clanId = int(fields[2])
                 print 'Clan roll in channel ' + channel + ' for player ' + str(userId) + ' in clan ' + str(clanId)
-                limiter.check(channel, userId, clanId, aleabot_config)
-                limiter.update(channel, userId, clanId, aleabot_config)
+                limiter.check(channel, userId, clanId, currentTime, config)
+                limiter.update(channel, userId, clanId, currentTime, config)
         except ValueError as err:
             print('Unable to parse request, make sure to only use player/clan IDs instead of names')
         except RollLimitError as err:
