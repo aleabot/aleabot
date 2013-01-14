@@ -118,9 +118,12 @@ def aleabot_parse(line):
                 else:
                     raise AleabotSyntaxError('unknown keyword')
             elif c in digits:
-                while pos < len(line) and line[pos] in digits:
+                # We ignore spaces in numbers (so that '1 2 3' is
+                # interpreted as 123), because KoL chat sometimes adds
+                # spaces to long words
+                while pos < len(line) and (line[pos] in digits or line[pos] == ' '):
                     pos += 1
-                value = int(line[pos1:pos])
+                value = int(line[pos1:pos].replace(' ', ''))
                 if pos < len(line) and alea.util.isunit(line[pos]):
                     value *= alea.util.getunit(line[pos])
                     pos += 1
