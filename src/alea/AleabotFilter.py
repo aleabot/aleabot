@@ -31,6 +31,7 @@ from kol.bot import BotUtils
 from kol.util import Report
 import re
 import time
+import alea.breakfast
 import alea.clan
 import alea.parser
 import alea.rng
@@ -135,6 +136,14 @@ def botEndCycle(context, **kwargs):
         aleabot.home_clan_timer += aleabot.config.get('time_to_sleep')
         if aleabot.home_clan_timer >= aleabot.config.get('home_clan_delay'):
             aleabot.home_clan_timer = -1
+
+            # Breakfast now if not yet breakfasted today
+            if 'breakfast' not in bot.states['rollover']:
+                alea.breakfast.breakfast(bot.session)
+                bot.states['rollover']['breakfast'] = True
+                bot.writeState('rollover')
+
+            # Switch to home clan now
             home_clan_id = aleabot.config.get('home_clan_id')
             if home_clan_id > 0 and aleabot.clanstate.my_clan().id() != home_clan_id:
                 Report.info('bot', 'Switching back to home clan.')

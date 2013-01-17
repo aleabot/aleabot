@@ -17,6 +17,7 @@ Name                             Purpose
 ./src/                           Contains our own python modules
 ./src/alea/                      Python module "alea"
 ./src/alea/AleabotFilter.py      Filter for pykol, implements aleabot
+./src/alea/breakfast.py          Daily breakfast
 ./src/alea/clan.py               Class for fetching and signing up to a clan
 ./src/alea/config.py             Configuration reader and list of settings
 ./src/alea/expr.py               Aleatory expression classes and aleabot_eval()
