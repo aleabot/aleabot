@@ -37,6 +37,7 @@ class RNG(object):
             self._source = None
         self._unicorn = 0  # Originally called _uniform but I like this typo
         self._modulus = 1
+
     def _readsource(self, required_modulus):
         # Read random bytes from the source until our modulus is
         # at least required_modulus
@@ -56,6 +57,7 @@ class RNG(object):
             assert(self._modulus >= required_modulus)
             assert(self._unicorn >= 0)
             assert(self._unicorn < self._modulus)
+
     def get(self, minvalue, maxvalue, n):
         # Get n random integers between minvalue and maxvalue, inclusive.
         # Returns a list (of length n) of integers.
@@ -65,6 +67,7 @@ class RNG(object):
             return [minvalue]*n
         l = list()
         range_size = maxvalue - minvalue + 1
+
         # See http://mathforum.org/library/drmath/view/65653.html
         for i in range(0, n):
             while True:
@@ -78,19 +81,21 @@ class RNG(object):
                 self._unicorn = self._unicorn // range_size
                 self._modulus = q
                 break
-                break
         return l
+
     def get_one(self, minvalue, maxvalue):
         return self.get(minvalue, maxvalue, 1)[0]
 
 class RNG_xkcd(object):
     def __init__(self):
         pass
+
     def get(self, minvalue, maxvalue, n):
         assert(minvalue <= maxvalue)
         value = 4  # chosen by fair dice roll.
                    # guaranteed to be random.
         value = max(min(value, maxvalue), minvalue)
         return [value]*n
+
     def get_one(self, minvalue, maxvalue):
         return self.get(minvalue, maxvalue, 1)[0]
