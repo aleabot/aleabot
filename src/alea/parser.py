@@ -92,8 +92,9 @@ def aleabot_parse(line):
                     tokens.append(('hellocommand',))
                 elif keyword == 'thanks' or keyword == 'thank' or keyword == 'ty' or keyword == 'thx' or keyword == 'kthxbye':
                     tokens.append(('thanks',))
-                    expect_name = True
-                    expect_name_multiword = True
+                    if len(tokens) == 1:
+                        expect_name = True
+                        expect_name_multiword = True
                 elif keyword == 'time' or keyword == 'date':
                     tokens.append(('timecommand',))
                 elif keyword == 'wang':
@@ -191,8 +192,7 @@ def aleabot_parse(line):
                 while pos < len(line) and line[pos] in namechars:
                     pos += 1
                 name = line[pos_namestart:pos].strip()
-                if name != '':
-                    tokens.append(('name', name))
+                tokens.append(('name', name))
                 expect_name = False
                 expect_name_ignore_slash = False
                 expect_name_multiword = False
@@ -256,8 +256,6 @@ def aleabot_parse(line):
                     advance(state)
                     if is_token(state, 'end'):
                         return ('thanksrequest',)
-            elif is_token(state, 'end'):
-                return ('thanksrequest',)
             raise AleabotSyntaxError('unable to parse thanks request')
         elif is_token(state, 'timecommand'):
             advance(state)
@@ -383,8 +381,7 @@ def aleabot_parse(line):
     if len(state.tokens) >= 1 and state.tokens[-1][0] == 'sentenceend':
         state.tokens.pop(-1)
     # if the list of tokens ends with 'thanks', remove 'thanks'
-    # only if the thanks not the only token
-    if len(state.tokens) >= 2 and state.tokens[-1][0] == 'thanks':
+    if len(state.tokens) >= 1 and state.tokens[-1][0] == 'thanks':
         state.tokens.pop(-1)
         # if there was a 'listseparator' before the thanks, remove it too
         if len(state.tokens) >= 1 and state.tokens[-1][0] == 'listseparator':
