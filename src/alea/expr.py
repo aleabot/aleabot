@@ -198,7 +198,7 @@ def aleabot_eval(exprlist, public, rng, aleabot_config):
     else:
         allow_diceless = aleabot_config.get('allow_diceless_private')
         allow_d1 = aleabot_config.get('allow_d1_private')
-    if (not allow_diceless) or (not allow_diceless):
+    if (not allow_diceless) or (not allow_d1):
         for expr in exprlist:
             classify = expr.classify_dice()
             if not allow_diceless and classify == 0:
