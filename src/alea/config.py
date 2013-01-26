@@ -442,7 +442,7 @@ class AleabotConfig(object):
         value = self._values[setting]
         if type(value) == list:
             assert(len(value) >= 1)
-            random_index = self._rng.get_one(0, len(value)-1)
+            random_index = self._rng.get(0, len(value)-1)
             return value[random_index]
         else:
             return value

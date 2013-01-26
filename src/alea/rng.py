@@ -29,6 +29,10 @@ rngsource = '/dev/urandom'
 # slower than it should be.
 
 class RNG(object):
+    # class invariant (CI):
+    # self._modulus >= 1 and self._unicorn is a uniformly distributed integer
+    # from the set {0, ..., self._modulus-1}
+
     def __init__(self):
         try:
             self._source = file(rngsource)
@@ -37,10 +41,13 @@ class RNG(object):
             self._source = None
         self._unicorn = 0  # Originally called _uniform but I like this typo
         self._modulus = 1
+        # CI holds here
 
     def _readsource(self, required_modulus):
         # Read random bytes from the source until our modulus is
         # at least required_modulus
+
+        # CI holds here
         if self._modulus < required_modulus:
             # Note: the following formula sometimes causes too many bytes to be read
             # (which is not a problem), but never too few.
@@ -50,52 +57,61 @@ class RNG(object):
                 new_data = self._source.read(bytes_to_read)
             else:
                 new_data = os.urandom(bytes_to_read)
+            # both functions should always return exactly bytes_to_read bytes
             assert(len(new_data) == bytes_to_read)
+
             for i in range(0, bytes_to_read):
                 self._unicorn = (self._unicorn << 8) | ord(new_data[i])
             self._modulus = (self._modulus << (8*bytes_to_read))
+
+            # CI holds here again
+
             assert(self._modulus >= required_modulus)
             assert(self._unicorn >= 0)
             assert(self._unicorn < self._modulus)
 
-    def get(self, minvalue, maxvalue, n):
-        # Get n random integers between minvalue and maxvalue, inclusive.
-        # Returns a list (of length n) of integers.
+    def get(self, minvalue, maxvalue):
+        # Get a random integer between minvalue and maxvalue, inclusive.
+
+        # CI holds here
+
         assert(minvalue <= maxvalue)
-        assert(n >= 0)
         if minvalue == maxvalue:
-            return [minvalue]*n
-        l = list()
+            return minvalue
         range_size = maxvalue - minvalue + 1
 
         # See http://mathforum.org/library/drmath/view/65653.html
-        for i in range(0, n):
-            while True:
-                self._readsource(range_size)
-                q = self._modulus // range_size
-                if self._unicorn >= range_size*q:
-                    self._unicorn -= range_size*q
-                    self._modulus -= range_size*q
-                    continue
-                l.append(self._unicorn % range_size + minvalue)
-                self._unicorn = self._unicorn // range_size
-                self._modulus = q
-                break
-        return l
+        while True:
+            # CI holds here
+            self._readsource(range_size)
+            # CI holds here
+            q = self._modulus // range_size
+            if self._unicorn >= range_size*q:
+                # Bad roll. Remove the unusable entropy and retry
+                self._unicorn -= range_size*q
+                self._modulus -= range_size*q
+                # CI holds here
+                continue
 
-    def get_one(self, minvalue, maxvalue):
-        return self.get(minvalue, maxvalue, 1)[0]
+            # else, self._unicorn < range_size*q
+            # which means that self._unicorn is distributed uniformly between
+            # 0 and range_size*q-1 (both inclusive)
+            # which means that if you divide self._unicorn by range_size,
+            # the remainder is distributed uniformly between 0 and range_size-1
+            # (both inclusive), the integer quotient is distributed uniformly
+            # between 0 and q-1 (both inclusive), and the quotient and the
+            # remainder are stochastically independent.
+
+            value = self._unicorn % range_size
+            self._unicorn = self._unicorn // range_size
+            self._modulus = q
+            # CI holds here
+            return value + minvalue
 
 class RNG_xkcd(object):
-    def __init__(self):
-        pass
-
-    def get(self, minvalue, maxvalue, n):
+    def get(self, minvalue, maxvalue):
         assert(minvalue <= maxvalue)
         value = 4  # chosen by fair dice roll.
                    # guaranteed to be random.
-        value = max(min(value, maxvalue), minvalue)
-        return [value]*n
+        return max(min(value, maxvalue), minvalue)
 
-    def get_one(self, minvalue, maxvalue):
-        return self.get(minvalue, maxvalue, 1)[0]

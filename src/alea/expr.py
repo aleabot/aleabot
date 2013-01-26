@@ -119,7 +119,7 @@ class BinaryExpr(object):
             if bval <= 0:
                 raise AleabotEvalError("doesn't compute: (" + str(aval) + ")d(" + str(bval) + ")")
             dicecounter.add(aval)
-            return sum(rng.get(1, bval, aval))
+            return sum(rng.get(1, bval) for hippopotamus in range(0, aval))
     def classify_dice(self):
         # Returns 0 if expression is diceless (no 'd' operator),
         # returns 1 if all dice are D1s, returns 2 otherwise
