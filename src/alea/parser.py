@@ -39,17 +39,19 @@ def aleabot_parse(line):
     #       (without initial slash), for private rolls, channelname = ''
     #   ('rollverifyrequest', playername)
     #     - playername is the name of the player (not yet resolved to user id)
-    #   ('helprequest')
-    #   ('hellorequest')
-    #   ('thanksrequest')
-    #   ('timerequest')
+    #   ('helprequest',)
+    #   ('hellorequest',)
+    #   ('thanksrequest',)
+    #   ('timerequest',)
     #   ('wangrequest', playername)
     #     - playername is the name of the player (not yet resolved to user id)
     #   ('arrowrequest', playername)
     #     - playername is the name of the player (not yet resolved to user id)
     #   ('uneffectrequest', uneffectable)
     #     - uneffectable is an instance of class alea.util.Uneffectable
-    #   ('nullrequest')
+    #   ('dontwangmerequest',)
+    #   ('allowwangrequest',)
+    #   ('nullrequest',)
 
     # First step in parsing is lexing. This inner function takes the line
     # passed to aleabot_parse() and converts it into a list of tokens.
@@ -88,8 +90,8 @@ def aleabot_parse(line):
                     tokens.append(('helpcommand',))
                 elif keyword == 'hello' or keyword == 'hi' or keyword == 'hey':
                     tokens.append(('hellocommand',))
-                elif keyword == 'thanks' or keyword == 'thank' or keyword == 'ty' or keyword == 'thx':
-                    tokens.append(('thankscommand',))
+                elif keyword == 'thanks' or keyword == 'thank' or keyword == 'ty' or keyword == 'thx' or keyword == 'kthxbye':
+                    tokens.append(('thanks',))
                     expect_name = True
                     expect_name_multiword = True
                 elif keyword == 'time' or keyword == 'date':
@@ -106,6 +108,10 @@ def aleabot_parse(line):
                     tokens.append(('uneffectcommand',))
                     expect_name = True
                     expect_name_multiword = True
+                elif keyword == 'dontwangme':
+                    tokens.append(('dontwangmecommand',))
+                elif keyword == 'allowwang':
+                    tokens.append(('allowwangcommand',))
                 elif keyword == 'in':
                     tokens.append(('in',))
                     expect_name = True
@@ -185,13 +191,13 @@ def aleabot_parse(line):
                 while pos < len(line) and line[pos] in namechars:
                     pos += 1
                 name = line[pos_namestart:pos].strip()
-                tokens.append(('name', name))
+                if name != '':
+                    tokens.append(('name', name))
                 expect_name = False
                 expect_name_ignore_slash = False
                 expect_name_multiword = False
             while pos < len(line) and line[pos].isspace():
                 pos += 1
-        tokens.append(('end',))
         return tokens
     # After the lexing is done, the tokens must be processed.
     # Some helper functions for that purpose follow.
@@ -242,7 +248,7 @@ def aleabot_parse(line):
             if is_token(state, 'end'):
                 return ('hellorequest',)
             raise AleabotSyntaxError('unable to parse hello request')
-        elif is_token(state, 'thankscommand'):
+        elif is_token(state, 'thanks'):
             advance(state)
             if is_token(state, 'name'):
                 playername = get_token_parameter(state)
@@ -250,6 +256,8 @@ def aleabot_parse(line):
                     advance(state)
                     if is_token(state, 'end'):
                         return ('thanksrequest',)
+            elif is_token(state, 'end'):
+                return ('thanksrequest',)
             raise AleabotSyntaxError('unable to parse thanks request')
         elif is_token(state, 'timecommand'):
             advance(state)
@@ -280,6 +288,16 @@ def aleabot_parse(line):
                 if is_token(state, 'end'):
                     return ('uneffectrequest', alea.util.Uneffectable(effectname))
             raise AleabotSyntaxError('unable to parse uneffect request')
+        elif is_token(state, 'dontwangmecommand'):
+            advance(state)
+            if is_token(state, 'end'):
+                return ('dontwangmerequest',)
+            raise AleabotSyntaxError('unable to parse dontwangme request')
+        elif is_token(state, 'allowwangcommand'):
+            advance(state)
+            if is_token(state, 'end'):
+                return ('allowwangrequest',)
+            raise AleabotSyntaxError('unable to parse allowwang request')
         elif is_token(state, 'end'):
             return ('nullrequest',)
         raise AleabotSyntaxError('unable to parse request')
@@ -358,18 +376,27 @@ def aleabot_parse(line):
     # if the list of tokens start with 'please', remove 'please'
     if len(state.tokens) >= 1 and state.tokens[0][0] == 'please':
         state.tokens.pop(0)
-    # if the list of tokens ends with 'heart_or_smile';'end', remove 'heart_or_smile'
-    if len(state.tokens) >= 2 and state.tokens[-2][0] == 'heart_or_smile':
-        state.tokens.pop(-2)
-    # if the list of tokens ends with 'sentenceend';'end', remove 'sentenceend'
-    if len(state.tokens) >= 2 and state.tokens[-2][0] == 'sentenceend':
-        state.tokens.pop(-2)
-    # if the list of tokens ends with 'please';'end', remove 'please'
-    if len(state.tokens) >= 2 and state.tokens[-2][0] == 'please':
-        state.tokens.pop(-2)
+    # if the list of tokens ends with 'heart_or_smile', remove 'heart_or_smile'
+    if len(state.tokens) >= 1 and state.tokens[-1][0] == 'heart_or_smile':
+        state.tokens.pop(-1)
+    # if the list of tokens ends with 'sentenceend' remove 'sentenceend'
+    if len(state.tokens) >= 1 and state.tokens[-1][0] == 'sentenceend':
+        state.tokens.pop(-1)
+    # if the list of tokens ends with 'thanks', remove 'thanks'
+    # only if the thanks not the only token
+    if len(state.tokens) >= 2 and state.tokens[-1][0] == 'thanks':
+        state.tokens.pop(-1)
+        # if there was a 'listseparator' before the thanks, remove it too
+        if len(state.tokens) >= 1 and state.tokens[-1][0] == 'listseparator':
+            state.tokens.pop(-1)
+    # if the list of tokens ends with 'please', remove 'please'
+    if len(state.tokens) >= 1 and state.tokens[-1][0] == 'please':
+        state.tokens.pop(-1)
         # if there was a 'listseparator' before the please, remove it too
-        if len(state.tokens) >= 2 and state.tokens[-2][0] == 'listseparator':
-            state.tokens.pop(-2)
+        if len(state.tokens) >= 1 and state.tokens[-1][0] == 'listseparator':
+            state.tokens.pop(-1)
+    # append an 'end' token to simplify the recursive descent parser
+    state.tokens.append(('end',))
     state.tokenpos = 0
     return parse_request(state)
 

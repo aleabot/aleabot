@@ -457,6 +457,8 @@ def botProcessChat(context, **kwargs):
                         msg = aleabot.config.get('error_wang_sender_limit')
                     elif wang_target_count >= aleabot.config.get('wang_target_limit'):
                         msg = aleabot.config.get('error_wang_target_limit')
+                    elif target_id != user_id and ('dontwangme_' + target_id) in bot.states['global']:
+                        msg = aleabot.config.get('error_wang_notwanted')
                     else:
 
                         # Limits not reached yet. Slap!
@@ -547,6 +549,20 @@ def botProcessChat(context, **kwargs):
                             msg = aleabot.config.get('error_uneffect_no_sgeea')
                         else:
                             msg = aleabot.config.get('error_uneffect_generic')
+
+            elif request[0] == 'dontwangmerequest':
+                # Handle a dontwangme request
+                key = 'dontwangme_' + user_id
+                bot.states['global'][key] = True
+                bot.writeState('global')
+                msg = aleabot.config.get('dontwangmetext')
+
+            elif request[0] == 'allowwangrequest':
+                # Handle an allowwang request
+                key = 'dontwangme_' + user_id
+                bot.states['global'].pop(key, None)
+                bot.writeState('global')
+                msg = aleabot.config.get('allowwangtext')
 
         except GenericAleabotError:
             msg = aleabot.config.get('error_generic')

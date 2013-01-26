@@ -176,6 +176,12 @@ arrowtext_self = An arrow is on its way to you.
 # Response for uneffectrequest
 uneffecttext = Removing effect: %U
 
+# Response for dontwangmerequest
+dontwangmetext = I'm not letting other people wang you anymore.
+
+# Response for allowwangrequest
+allowwangtext = Now allowing other people to wang you.
+
 # Response for kmailed arrow request with no arrow attached
 kmailtext_arrow_notattached = I tried to interpret this message as an arrow request, but there was no arrow attached. Please attach an arrow so that I can fire it at you.
 
@@ -269,6 +275,9 @@ error_wang_target_limit = Target has already been hit with enough wangs today.
 
 # Error message when wang_sender_limit has been reached
 error_wang_sender_limit = You have already used enough wangs today.
+
+# Error message when target has a dontwangme active
+error_wang_notwanted = Target doesn't want to be hit with a wang. Sorry!
 
 # Error message when wang could not be used for an unknown reason
 error_wang_generic = Unable to use wang for unknown reason.

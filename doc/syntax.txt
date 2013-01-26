@@ -4,7 +4,8 @@ Parser Syntax
 (* Start symbol: Request *)
 Request = [ Please ],
           [ RollRequest | HelpRequest | HelloRequest | ThanksRequest |
-	    WangRequest | ArrowRequest | UneffectRequest ],
+	    WangRequest | ArrowRequest | UneffectRequest |
+	    DontWangMeRequest | AllowWangRequest ],
           [ [ ListSeparator ] Please ] [ SentenceEnd ] [ HeartOrSmile ] ;
 
 RollRequest = RollCommand, ExpressionList, [ In, ChannelName ] ;
@@ -21,6 +22,10 @@ WangRequest = WangCommand, [ PlayerName ] ;
 ArrowRequest = ArrowCommand, [ PlayerName ] ;
 
 UneffectRequest = UneffectCommand, [ EffectName ] ;
+
+DontWangMeRequest = DontWangMeCommand ;
+
+AllowWangRequest = AllowWangCommand ;
 
 ExpressionList = Expression, { ListSeparator, Expression } ;
 
@@ -57,6 +62,10 @@ WangCommand = "wang" ;
 ArrowCommand = "arrow" ;
 
 UneffectCommand = "uneffect" ;
+
+DontWangMeCommand = "dontwangme" ;
+
+AllowWangCommand = "allowwang" ;
 
 In = "in" ;
 

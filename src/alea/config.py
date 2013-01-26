@@ -211,6 +211,14 @@ settings = [
             ['Removing effect: %U'],
             """Response for uneffectrequest"""),
 
+        ('chatter', 'dontwangmetext', 'stringchoice',
+            ['I\'m not letting other people wang you anymore.'],
+            """Response for dontwangmerequest"""),
+
+        ('chatter', 'allowwangtext', 'stringchoice',
+            ['Now allowing other people to wang you.'],
+            """Response for allowwangrequest"""),
+
         ('chatter', 'kmailtext_arrow_notattached', 'stringchoice',
             ['I tried to interpret this message as an arrow request, but there was no arrow attached. Please attach an arrow so that I can fire it at you.'],
             """Response for kmailed arrow request with no arrow attached"""),
@@ -306,6 +314,9 @@ settings = [
         ('chatter', 'error_wang_sender_limit', 'stringchoice',
             ['You have already used enough wangs today.'],
             """Error message when wang_sender_limit has been reached"""),
+        ('chatter', 'error_wang_notwanted', 'stringchoice',
+            ['Target doesn\'t want to be hit with a wang. Sorry!'],
+            """Error message when target has a dontwangme active"""),
         ('chatter', 'error_wang_generic', 'stringchoice',
             ['Unable to use wang for unknown reason.'],
             """Error message when wang could not be used for an unknown reason"""),
