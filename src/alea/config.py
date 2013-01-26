@@ -430,7 +430,7 @@ class AleabotConfig(object):
                         config.get(settingsection, setting)
                 else:
                     raise ValueError('AleabotConfig.load(): bad settingtype ' + settingtype)
-                self._values[setting] = value
+                newvalues[setting] = value
         except ConfigParser.Error as err:
             raise AleabotConfigError(str(err))
         except ValueError as err:
