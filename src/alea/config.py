@@ -150,8 +150,8 @@ settings = [
         ('limits', 'allow_d1_private', 'bool', True,
             """Allow private D1 rolls?"""),
 
-        ('limits', 'expression_count_max', 'int', 10,
-            """Maximum permitted expression count"""),
+        ('limits', 'result_count_max', 'int', 10,
+            """Maximum permitted number or results per roll"""),
         ('limits', 'dice_per_expression_max', 'int', 1000,
             """Allow nDx rolls up to n = this number (cumulative within expression)"""),
 
@@ -283,9 +283,9 @@ settings = [
         ('chatter', 'error_public_perchannel_limit', 'stringchoice',
             ['Sorry, you have to wait for one minute since the last roll.'],
             """Error message for disallowed public roll due to per-channel limit"""),
-        ('chatter', 'error_too_many_expressions', 'stringchoice',
-            ['I can handle only ten of these dice formulas at once. How\'d you feel if I threw that much math at you?'],
-            """Error message when request contains too many expressions"""),
+        ('chatter', 'error_too_many_results', 'stringchoice',
+            ['Nah, ten is enough.'],
+            """Error message when roll gives too many results (e.g. too many expressions, or too large X in XsY)"""),
         ('chatter', 'error_expression_too_many_dice', 'stringchoice',
             ['More than 1000 dice in one formula? Not going to fly.'],
             """Error message when expression contains too many dice"""),

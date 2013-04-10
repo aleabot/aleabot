@@ -25,7 +25,7 @@ class AleabotEvalError(Exception):
     def __str__(self):
         return repr(self.value)
 
-class ExpressionCountExceededError(AleabotEvalError):
+class ResultCountExceededError(AleabotEvalError):
     def __init__(self, value):
         self.value = value
     def __str__(self):
@@ -80,7 +80,9 @@ class BinaryExpr(object):
             '%': (1, 1, 2),
             '^': (2, 3, 2),
             'D': (3, 4, 4),
+            'S': (3, 4, 4),
     }
+
     # Maximum number of bits in the result of an exponentiation operation
     # (to prevent excessive computation times)
     exponentiation_max_bits = 1024
@@ -90,48 +92,61 @@ class BinaryExpr(object):
         self.a = a
         self.b = b
         self.op = op
-    def eval(self, rng, dicecounter):
-        aval = self.a.eval(rng, dicecounter)
-        bval = self.b.eval(rng, dicecounter)
+
+    def eval(self, rng, dicecounter, maxresults):
+        if maxresults < 1:
+            raise ResultCountExceededError('result count exceeded')
+        aval = self.a.eval(rng, dicecounter, 1)[0]
+        bval = self.b.eval(rng, dicecounter, 1)[0]
         if self.op == '+':
-            return aval + bval
+            return [aval + bval]
         elif self.op == '-':
-            return aval - bval
+            return [aval - bval]
         elif self.op == '*':
-            return aval * bval
+            return [aval * bval]
         elif self.op == '/':
             if bval == 0:
                 raise AleabotEvalError("doesn't compute: (" + str(aval) + ")/(" + str(bval) + ")")
-            return aval // bval  # integer division only
+            return [aval // bval]  # integer division only
         elif self.op == '%':
             if bval == 0:
                 raise AleabotEvalError("doesn't compute: (" + str(aval) + ")%(" + str(bval) + ")")
-            return aval % bval
+            return [aval % bval]
         elif self.op == '^':
             if bval < 0:
                 raise AleabotEvalError("doesn't compute: (" + str(aval) + ")^(" + str(bval) + ")")
             if alea.util.intlog2(abs(aval)) * bval > BinaryExpr.exponentiation_max_bits:
                 raise AleabotEvalError("exponentiation limit exceeded: (" + str(aval) + ")^(" + str(bval) + ")")
-            return aval ** bval  # note: returns 1 for aval == bval == 0
+            return [aval ** bval]  # note: returns 1 for aval == bval == 0
         elif self.op == 'D':
-            if aval < 0:
-                raise AleabotEvalError("doesn't compute: (" + str(aval) + ")d(" + str(bval) + ")")
-            if bval <= 0:
-                raise AleabotEvalError("doesn't compute: (" + str(aval) + ")d(" + str(bval) + ")")
+            if aval < 0 or bval <= 0:
+                raise AleabotEvalError("doesn't compute: (" + str(aval) + ")D(" + str(bval) + ")")
             dicecounter.add(aval)
-            return sum(rng.get(1, bval) for hippopotamus in range(0, aval))
+            return [alea.util.roll(rng, aval, bval)]
+        elif self.op == 'S':
+            if self.a.classify_dice() != 0 or self.b.classify_dice() != 0:
+                raise AleabotEvalError("operands of S operator must be diceless")
+            if aval < 0 or bval <= 0 or aval > bval:
+                raise AleabotEvalError("doesn't compute: (" + str(aval) + ")S(" + str(bval) + ")")
+            if maxresults < aval:
+                raise ResultCountExceededError('result count exceeded')
+            return alea.util.shuffle(rng, aval, bval) 
+
+
+
     def classify_dice(self):
-        # Returns 0 if expression is diceless (no 'd' operator),
+        # Returns 0 if expression is diceless (no 'd'/'s' operator),
         # returns 1 if all dice are D1s, returns 2 otherwise
         classify_a = self.a.classify_dice()
         classify_b = self.b.classify_dice()
-        if self.op == 'D':
-            if classify_a <= 1 and classify_b <= 1 and self.b.eval(alea.rng.RNG_xkcd(), DiceCounter(0)) == 1:
+        if self.op == 'D' or self.op == 'S':
+            if classify_a <= 1 and classify_b <= 1 and self.b.eval(alea.rng.RNG_xkcd(), DiceCounter(0), 1) == 1:
                 return 1
             else:
                 return 2
         else:
             return max(classify_a, classify_b)
+
     def format(self, paren_if_level_below):
         level = BinaryExpr.oplevel[self.op][0]
         level_a = BinaryExpr.oplevel[self.op][1]
@@ -140,6 +155,7 @@ class BinaryExpr(object):
             return '(' + self.a.format(level_a) + self.op + self.b.format(level_b) + ')'
         else:
             return self.a.format(level_a) + self.op + self.b.format(level_b)
+
     def __str__(self):
         return self.format(0)
 
@@ -152,18 +168,24 @@ class UnaryExpr(object):
             '+': (0, 1),
             '-': (0, 1),
     }
+
     def __init__(self,a,op):
         assert(op in UnaryExpr.oplevel)
         self.a = a
         self.op = op
-    def eval(self, rng, dicecounter):
-        aval = self.a.eval(rng, dicecounter)
+
+    def eval(self, rng, dicecounter, maxresults):
+        if maxresults < 1:
+            raise ResultCountExceededError('result count exceeded')
+        aval = self.a.eval(rng, dicecounter, 1)[0]
         if self.op == '+':
-            return aval
+            return [aval]
         elif self.op == '-':
-            return -aval
+            return [-aval]
+
     def classify_dice(self):
         return self.a.classify_dice()
+
     def format(self, paren_if_level_below):
         level = UnaryExpr.oplevel[self.op][0]
         level_a = UnaryExpr.oplevel[self.op][1]
@@ -171,26 +193,29 @@ class UnaryExpr(object):
             return '(' + self.op + self.a.format(level_a) + ')'
         else:
             return self.op + self.a.format(level_a)
+
     def __str__(self):
         return self.format(0)
 
 class NumberExpr(object):
     def __init__(self,value):
         self.value = value
-    def eval(self, rng, dicecounter):
-        return self.value
+
+    def eval(self, rng, dicecounter, maxresults):
+        if maxresults < 1:
+            raise ResultCountExceededError('result count exceeded')
+        return [self.value]
+
     def classify_dice(self):
         return 0
+
     def format(self, paren_if_level_below):
         return alea.util.format_with_unit(self.value)
+
     def __str__(self):
         return self.format(0)
 
 def aleabot_eval(exprlist, public, rng, aleabot_config):
-    # Verify expression count limit
-    expression_count_max = aleabot_config.get('expression_count_max')
-    if expression_count_max > 0 and len(exprlist) > expression_count_max:
-        raise ExpressionCountExceededError('Expression count exceeded')
     # Verify d1/diceless limit
     if public:
         allow_diceless = aleabot_config.get('allow_diceless_public')
@@ -205,10 +230,17 @@ def aleabot_eval(exprlist, public, rng, aleabot_config):
                 raise DicelessDisallowedError('Diceless roll not allowed')
             if not allow_d1 and classify == 1:
                 raise D1DisallowedError('D1 roll not allowed')
-    # Roll and verify dice limit
+    # Get result count limit. If <= 0, set to practically unlimited.
+    result_count_max = aleabot_config.get('result_count_max')
+    if result_count_max <= 0:
+        result_count_max = 0xDEADBEEF  # Limited by meat. Wait, what?!
+    # Roll (and at the same time verify result count / dice limits)
     dice_per_expression_max = aleabot_config.get('dice_per_expression_max')
-    results = []
+    all_results = []
     for expr in exprlist:
-        result = expr.eval(rng, DiceCounter(dice_per_expression_max))
-        results.append(result)
-    return results
+        results = expr.eval(rng,
+                DiceCounter(dice_per_expression_max),
+                result_count_max)
+        result_count_max -= len(results)
+        all_results.extend(results)
+    return all_results

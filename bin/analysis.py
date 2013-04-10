@@ -198,7 +198,7 @@ def test_expression(expr, rng, options):
     print 'Rolling ' + str(expr) + ' ' + str(options.samples) + ' times gives...'
     dicecounter = alea.expr.DiceCounter(0)
     for j in range(0, options.samples):
-        x = expr.eval(rng, dicecounter)
+        x = expr.eval(rng, dicecounter, 1)[0]
         ac.add(x)
         if histogram:
             histogram.add(x)

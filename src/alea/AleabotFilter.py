@@ -580,8 +580,8 @@ def botProcessChat(context, **kwargs):
             msg = aleabot.config.get('error_public_perplayer_limit')
         except alea.rolllimiter.PublicPerChannelRollLimitError:
             msg = aleabot.config.get('error_public_perchannel_limit')
-        except alea.expr.ExpressionCountExceededError:
-            msg = aleabot.config.get('error_too_many_expressions')
+        except alea.expr.ResultCountExceededError:
+            msg = aleabot.config.get('error_too_many_results')
         except alea.expr.DiceCountExceededError:
             msg = aleabot.config.get('error_expression_too_many_dice')
         except alea.expr.DicelessDisallowedError:

@@ -123,6 +123,8 @@ def aleabot_parse(line):
                     tokens.append(('listseparator',))
                 elif keyword == 'd':
                     tokens.append(('dice','D'))
+                elif keyword == 's':
+                    tokens.append(('dice','S'))
                 else:
                     raise AleabotSyntaxError('unknown keyword')
             elif c in digits:
@@ -414,7 +416,7 @@ if __name__ == '__main__':
             for i in range(0, len(t[1])):
                 print 'Expression: ' + str(t[1][i])
                 try:
-                    print 'Eval: ' + str(t[1][i].eval(rng, alea.expr.DiceCounter(0)))
+                    print 'Eval: ' + str(t[1][i].eval(rng, alea.expr.DiceCounter(0), 10))
                     print 'Classify dice: ' + str(t[1][i].classify_dice())
                 except alea.expr.AleabotEvalError as err:
                     print 'error: ' + str(err)

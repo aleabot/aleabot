@@ -99,8 +99,8 @@ allow_d1_public = yes
 # Allow private D1 rolls?
 allow_d1_private = yes
 
-# Maximum permitted expression count
-expression_count_max = 10
+# Maximum permitted number or results per roll
+result_count_max = 10
 
 # Allow nDx rolls up to n = this number (cumulative within expression)
 dice_per_expression_max = 1000
@@ -246,8 +246,8 @@ error_public_perplayer_limit = Sorry, you have to wait for one minute since the 
 # Error message for disallowed public roll due to per-channel limit
 error_public_perchannel_limit = Sorry, you have to wait for one minute since the last roll.
 
-# Error message when request contains too many expressions
-error_too_many_expressions = I can handle only ten of these dice formulas at once. How'd you feel if I threw that much math at you?
+# Error message when roll gives too many results (e.g. too many expressions, or too large X in XsY)
+error_too_many_results = Nah, ten is enough.
 
 # Error message when expression contains too many dice
 error_expression_too_many_dice = More than 1000 dice in one formula? Not going to fly.

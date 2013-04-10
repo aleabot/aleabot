@@ -16,6 +16,7 @@
 #
 
 
+import bisect
 import re
 import textwrap
 
@@ -30,6 +31,23 @@ def intlog2(n):
 
 def ceildiv(a, b):
     return (a+b-1) // b
+
+def roll(rng, a, b):
+    # Roll aDb, returns an integer
+    return sum(rng.get(1, b) for hippopotamus in range(0, a))
+
+def shuffle(rng, a, b):
+    # Roll aSb, returns a list of integers
+    results = []
+    results_sorted = []
+    for i in range(0, a):
+        x = rng.get(1, b-i)
+        for j in results_sorted:
+            if x >= j:
+                x += 1
+        results.append(x)
+        bisect.insort(results_sorted, x)
+    return results
 
 def prefix_lines(text, prefix, margin):
     # Resolve and dedent hanging indent
