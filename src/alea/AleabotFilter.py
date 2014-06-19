@@ -129,7 +129,7 @@ def botEndCycle(context, **kwargs):
             if aleabot.home_clan_timer < 0:
                 aleabot.home_clan_timer = 0
     except alea.clan.ClanRequestError as err:
-        Report.error('Unable to update clan state! Error: ' + str(err))
+        Report.error('bot', 'Unable to update clan state! Error: ' + str(err))
 
     # Switch to home clan after some delay
     if aleabot.home_clan_timer >= 0:
@@ -150,7 +150,7 @@ def botEndCycle(context, **kwargs):
                 try:
                     aleabot.clanstate.switch(alea.clan.Clan(home_clan_id, ''))
                 except alea.clan.ClanRequestError as err:
-                    Report.error('Unable to switch clan! Error: ' + str(err))
+                    Report.error('bot', 'Unable to switch clan! Error: ' + str(err))
 
     return returnCode
 
